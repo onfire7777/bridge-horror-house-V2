@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-07-10)
 ## Current Position
 
 Phase: 3 of 7 (Hunt Balance and Resource Fairness)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-10 — Verified legal cached pursuit, physical door waits, connected spawns, and unobstructed capture.
+Plan: 0 of 1 in current phase
+Status: Implementing
+Last activity: 2026-07-10 — Planned early hunt pressure, charge economy, warnings, and deterministic room keys.
 
 Progress: [███░░░░░░░] 29%
 
