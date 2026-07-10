@@ -39,7 +39,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. From either side of a closed door, Matt approaches it, opens it, waits for body clearance, and then crosses through the opening.
   3. If the player becomes unreachable, Matt stops or retries on a bounded cadence instead of reverting to wall-phasing pursuit.
   4. Matt manifests and reforms only at free, connected locations a legal route distance from the player, and cannot capture through a wall or closed door.
-**Plans**: TBD
+**Plans**: 1 plan
 
 ### Phase 3: Hunt Balance and Resource Fairness
 
@@ -118,7 +118,7 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Navigation Geometry and Collision Foundation | 1/1 | Complete | 2026-07-10 |
-| 2. Ghost Routing Doors and Spatial Validity | 0/TBD | Not started | - |
+| 2. Ghost Routing Doors and Spatial Validity | 0/1 | In progress | - |
 | 3. Hunt Balance and Resource Fairness | 0/TBD | Not started | - |
 | 4. Audio Buses Persistence and Settings UI | 0/TBD | Not started | - |
 | 5. Capture and Sound-Safety Orchestration | 0/TBD | Not started | - |

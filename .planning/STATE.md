@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-07-10)
 ## Current Position
 
 Phase: 2 of 7 (Ghost Routing Doors and Spatial Validity)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-10 — Verified and completed blocker-safe navigation geometry.
+Plan: 0 of 1 in current phase
+Status: Implementing
+Last activity: 2026-07-10 — Planned cached routing, physical doors, legal spawns, and capture visibility.
 
 Progress: [█░░░░░░░░░] 14%
 
