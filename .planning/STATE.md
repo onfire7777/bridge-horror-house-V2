@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-07-10)
 ## Current Position
 
 Phase: 4 of 7 (Audio Buses Persistence and Settings UI)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-10 — Verified escalating hunt tiers, charge economy, warnings, supply, and seeded key fairness.
+Plan: 0 of 1 in current phase
+Status: Implementing
+Last activity: 2026-07-10 — Planned persistent semantic audio buses and isolated title/pause controls.
 
 Progress: [████░░░░░░] 43%
 
