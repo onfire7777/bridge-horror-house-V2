@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-07-10)
 
 **Core value:** The player must feel hunted by a monster that obeys the house, becomes more dangerous over time, and can be driven back—but never permanently neutralized—by carefully managed flashlight power.
-**Current focus:** Phase 3 — Hunt Balance and Resource Fairness
+**Current focus:** Phase 4 — Audio Buses Persistence and Settings UI
 
 ## Current Position
 
-Phase: 3 of 7 (Hunt Balance and Resource Fairness)
-Plan: 0 of 1 in current phase
-Status: Implementing
-Last activity: 2026-07-10 — Planned early hunt pressure, charge economy, warnings, and deterministic room keys.
+Phase: 4 of 7 (Audio Buses Persistence and Settings UI)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-07-10 — Verified escalating hunt tiers, charge economy, warnings, supply, and seeded key fairness.
 
-Progress: [███░░░░░░░] 29%
+Progress: [████░░░░░░] 43%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 3
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -29,10 +29,11 @@ Progress: [███░░░░░░░] 29%
 |-------|-------|-------|----------|
 | Phase 1 | 1 | 1 | — |
 | Phase 2 | 1 | 1 | — |
+| Phase 3 | 1 | 1 | — |
 
 **Recent Trend:**
-- Last 5 plans: 01-01, 02-01
-- Trend: Two verified increments complete
+- Last 5 plans: 01-01, 02-01, 03-01
+- Trend: Three verified increments complete
 
 *Updated after each plan completion*
 
@@ -47,6 +48,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Scope]: Treat final balance, perceived jumpscare force, asset permission, room readability, and representative-device performance as evidence gates rather than assumed implementation outcomes.
 - [Navigation]: Use conservative grid rasterization and bounded collision substeps; blocked motion fails closed instead of phasing.
 - [Routing]: Use cached A* waypoints, full-open door clearance, route-distance manifestations, and post-motion visibility-gated capture.
+- [Balance]: Centralize hunt, charge, warning, supply, and seeded key rules in one pure module.
 
 ### Pending Todos
 
@@ -71,5 +73,5 @@ No blockers.
 ## Session Continuity
 
 Last session: 2026-07-10
-Stopped at: Phase 2 verified and pushed; Phase 3 is ready for hunt/resource planning.
-Resume file: .planning/phases/02-ghost-routing-doors-and-spatial-validity/02-01-SUMMARY.md
+Stopped at: Phase 3 verified and pushed; Phase 4 is ready for audio bus and settings work.
+Resume file: .planning/phases/03-hunt-balance-and-resource-fairness/03-01-SUMMARY.md

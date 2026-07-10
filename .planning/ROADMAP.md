@@ -8,7 +8,7 @@ This milestone hardens the existing browser game in dependency order: establish 
 
 - [x] **Phase 1: Navigation Geometry and Collision Foundation** - Establish deterministic house geometry, legal routes, and blocker-safe movement primitives.
 - [x] **Phase 2: Ghost Routing Doors and Spatial Validity** - Make Matt execute cached routes, use doors, reform legally, and capture only through valid space.
-- [ ] **Phase 3: Hunt Balance and Resource Fairness** - Tune escalating pursuit, flashlight economy, and seeded key placement against legal route lengths.
+- [x] **Phase 3: Hunt Balance and Resource Fairness** - Tune escalating pursuit, flashlight economy, and seeded key placement against legal route lengths.
 - [ ] **Phase 4: Audio Buses Persistence and Settings UI** - Put every source under persistent, accessible semantic controls and a safe final mix.
 - [ ] **Phase 5: Capture and Sound-Safety Orchestration** - Deliver one cancellable full-screen jumpscare with controlled layered loudness and motion safety.
 - [ ] **Phase 6: BridgeMind Environment and Detailed Sound** - Add readable branded storytelling and a complete category-safe gameplay cue language.
@@ -53,7 +53,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   3. Flashlight use and defensive burning consume visible charge predictably, with distinct low and critical warnings and a reliable failure state at zero.
   4. Disciplined play can recover from low charge through capped pickups, while wasteful use creates real danger without producing invalid charge or an unavoidable soft lock.
   5. Each run presents one reachable, visible, collectable key in each authored room, varies candidates without repetition, and reproduces the same selection from the same seed.
-**Plans**: 1 plan
+**Plans**: 1/1 complete
 
 ### Phase 4: Audio Buses Persistence and Settings UI
 
@@ -119,7 +119,7 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 |-------|----------------|--------|-----------|
 | 1. Navigation Geometry and Collision Foundation | 1/1 | Complete | 2026-07-10 |
 | 2. Ghost Routing Doors and Spatial Validity | 1/1 | Complete | 2026-07-10 |
-| 3. Hunt Balance and Resource Fairness | 0/1 | In progress | - |
+| 3. Hunt Balance and Resource Fairness | 1/1 | Complete | 2026-07-10 |
 | 4. Audio Buses Persistence and Settings UI | 0/TBD | Not started | - |
 | 5. Capture and Sound-Safety Orchestration | 0/TBD | Not started | - |
 | 6. BridgeMind Environment and Detailed Sound | 0/TBD | Not started | - |

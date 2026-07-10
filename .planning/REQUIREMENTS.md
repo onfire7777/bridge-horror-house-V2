@@ -23,16 +23,16 @@
 
 ### Hunt Difficulty
 
-- [ ] **HUNT-01**: Pressure escalates across the run through coordinated encounter cadence, pursuit persistence, speed, audio proximity, and post-key behavior rather than speed alone.
-- [ ] **HUNT-02**: Matt begins meaningful stalking earlier, continues following the player through the house, and the final-key chase is substantially harder while remaining beatable.
-- [ ] **HUNT-03**: Sustained flashlight contact still banishes Matt, but burn buildup is deliberate and chase banishment downtime is shorter so he returns sooner at a valid routed position.
+- [x] **HUNT-01**: Pressure escalates across the run through coordinated encounter cadence, pursuit persistence, speed, audio proximity, and post-key behavior rather than speed alone.
+- [x] **HUNT-02**: Matt begins meaningful stalking earlier, continues following the player through the house, and the final-key chase is substantially harder while remaining beatable.
+- [x] **HUNT-03**: Sustained flashlight contact still banishes Matt, but burn buildup is deliberate and chase banishment downtime is shorter so he returns sooner at a valid routed position.
 
 ### Battery and Keys
 
-- [ ] **BATT-01**: Flashlight use drains charge continuously, defensive burning consumes an additional surcharge, sprinting or panic use does not produce negative/invalid charge, and the light fails predictably at zero.
-- [ ] **BATT-02**: Low and critical battery thresholds have distinct visual and audio warnings, pickups provide meaningful charge without exceeding the cap, and authored supply prevents an unavoidable soft lock under disciplined play.
-- [ ] **KEY-01**: Each run selects one key from curated candidates in the kitchen, study, and bedroom using non-repeating seeded selection suitable for deterministic tests.
-- [ ] **KEY-02**: Every key candidate is path-reachable, visually findable, and collectable from at least one unobstructed player interaction stance; no key may spawn inside geometry or behind an unusable surface.
+- [x] **BATT-01**: Flashlight use drains charge continuously, defensive burning consumes an additional surcharge, sprinting or panic use does not produce negative/invalid charge, and the light fails predictably at zero.
+- [x] **BATT-02**: Low and critical battery thresholds have distinct visual and audio warnings, pickups provide meaningful charge without exceeding the cap, and authored supply prevents an unavoidable soft lock under disciplined play.
+- [x] **KEY-01**: Each run selects one key from curated candidates in the kitchen, study, and bedroom using non-repeating seeded selection suitable for deterministic tests.
+- [x] **KEY-02**: Every key candidate is path-reachable, visually findable, and collectable from at least one unobstructed player interaction stance; no key may spawn inside geometry or behind an unusable surface.
 
 ### Sound Settings and Mix
 
@@ -99,13 +99,13 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 | NAV-03 | Phase 2 | Complete |
 | NAV-04 | Phase 2 | Complete |
 | NAV-05 | Phase 2 | Complete |
-| HUNT-01 | Phase 3 | Pending |
-| HUNT-02 | Phase 3 | Pending |
-| HUNT-03 | Phase 3 | Pending |
-| BATT-01 | Phase 3 | Pending |
-| BATT-02 | Phase 3 | Pending |
-| KEY-01 | Phase 3 | Pending |
-| KEY-02 | Phase 3 | Pending |
+| HUNT-01 | Phase 3 | Complete |
+| HUNT-02 | Phase 3 | Complete |
+| HUNT-03 | Phase 3 | Complete |
+| BATT-01 | Phase 3 | Complete |
+| BATT-02 | Phase 3 | Complete |
+| KEY-01 | Phase 3 | Complete |
+| KEY-02 | Phase 3 | Complete |
 | AUD-01 | Phase 4 | Pending |
 | AUD-02 | Phase 4 | Pending |
 | AUD-03 | Phase 4 | Pending |
@@ -128,4 +128,4 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 
 ---
 *Requirements defined: 2026-07-10*
-*Last updated: 2026-07-10 after Phase 2 verification*
+*Last updated: 2026-07-10 after Phase 3 verification*
