@@ -94,7 +94,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. Critical audio states also have visible feedback, so the player can understand danger, battery, collection, and capture information without sound alone.
   3. Every major room contains a readable BridgeMind focal artifact and a secondary permission-safe detail that support environmental storytelling rather than decorative noise.
   4. The player can still traverse, find keys, read interactions, and track Matt after enrichment, with no new accidental blocker or material performance regression.
-**Plans**: TBD
+**Plans**: 1 plan
 **UI hint**: yes
 
 ### Phase 7: Production Verification and Tuning
@@ -122,5 +122,5 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | 3. Hunt Balance and Resource Fairness | 1/1 | Complete | 2026-07-10 |
 | 4. Audio Buses Persistence and Settings UI | 1/1 | Complete | 2026-07-10 |
 | 5. Capture and Sound-Safety Orchestration | 1/1 | Complete | 2026-07-10 |
-| 6. BridgeMind Environment and Detailed Sound | 0/TBD | Not started | - |
+| 6. BridgeMind Environment and Detailed Sound | 0/1 | In progress | - |
 | 7. Production Verification and Tuning | 0/TBD | Not started | - |
