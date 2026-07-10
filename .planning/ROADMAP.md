@@ -10,7 +10,7 @@ This milestone hardens the existing browser game in dependency order: establish 
 - [x] **Phase 2: Ghost Routing Doors and Spatial Validity** - Make Matt execute cached routes, use doors, reform legally, and capture only through valid space.
 - [x] **Phase 3: Hunt Balance and Resource Fairness** - Tune escalating pursuit, flashlight economy, and seeded key placement against legal route lengths.
 - [x] **Phase 4: Audio Buses Persistence and Settings UI** - Put every source under persistent, accessible semantic controls and a safe final mix.
-- [ ] **Phase 5: Capture and Sound-Safety Orchestration** - Deliver one cancellable full-screen jumpscare with controlled layered loudness and motion safety.
+- [x] **Phase 5: Capture and Sound-Safety Orchestration** - Deliver one cancellable full-screen jumpscare with controlled layered loudness and motion safety.
 - [ ] **Phase 6: BridgeMind Environment and Detailed Sound** - Add readable branded storytelling and a complete category-safe gameplay cue language.
 - [ ] **Phase 7: Production Verification and Tuning** - Prove the integrated experience in the production build, tune it from evidence, and verify Git parity.
 
@@ -80,7 +80,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. Jumpscare intensity changes the force of the sting, master mute silences it completely, and the final mix feels loud without uncontrolled clipping.
   3. Repeated or cancelled capture calls never stack transitions, timers, sounds, ducking, or stale screen state, and a new run starts cleanly.
   4. Reduced-motion preference removes nonessential lunge, jitter, and shake, while the static impact remains strong without unsafe large-area flashing.
-**Plans**: 1 plan
+**Plans**: 1/1 complete
 **UI hint**: yes
 
 ### Phase 6: BridgeMind Environment and Detailed Sound
@@ -121,6 +121,6 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | 2. Ghost Routing Doors and Spatial Validity | 1/1 | Complete | 2026-07-10 |
 | 3. Hunt Balance and Resource Fairness | 1/1 | Complete | 2026-07-10 |
 | 4. Audio Buses Persistence and Settings UI | 1/1 | Complete | 2026-07-10 |
-| 5. Capture and Sound-Safety Orchestration | 0/1 | In progress | - |
+| 5. Capture and Sound-Safety Orchestration | 1/1 | Complete | 2026-07-10 |
 | 6. BridgeMind Environment and Detailed Sound | 0/TBD | Not started | - |
 | 7. Production Verification and Tuning | 0/TBD | Not started | - |

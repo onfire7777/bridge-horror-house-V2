@@ -43,9 +43,9 @@
 
 ### Jumpscare
 
-- [ ] **SCARE-01**: Capture triggers one atomic full-viewport Matt jumpscare whose layered sting combines contrast ducking, distortion, voice, impact/noise, and compressor-limited loudness scaled by the jumpscare setting.
-- [ ] **SCARE-02**: The capture sequence is idempotent and cancellable, freezes gameplay/input, fills common viewport sizes without letterboxing the threat, cleans up timers/audio/ducking, and transitions exactly once to retry/death state.
-- [ ] **SCARE-03**: Reduced-motion preference removes nonessential lunge/jitter/shake and the effect avoids unsafe large-area flashing while preserving a strong static impact.
+- [x] **SCARE-01**: Capture triggers one atomic full-viewport Matt jumpscare whose layered sting combines contrast ducking, distortion, voice, impact/noise, and compressor-limited loudness scaled by the jumpscare setting.
+- [x] **SCARE-02**: The capture sequence is idempotent and cancellable, freezes gameplay/input, fills common viewport sizes without letterboxing the threat, cleans up timers/audio/ducking, and transitions exactly once to retry/death state.
+- [x] **SCARE-03**: Reduced-motion preference removes nonessential lunge/jitter/shake and the effect avoids unsafe large-area flashing while preserving a strong static impact.
 
 ### BridgeMind Environment
 
@@ -110,9 +110,9 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 | AUD-02 | Phase 4 | Complete |
 | AUD-03 | Phase 4 | Complete |
 | AUD-04 | Phase 6 | Pending |
-| SCARE-01 | Phase 5 | Pending |
-| SCARE-02 | Phase 5 | Pending |
-| SCARE-03 | Phase 5 | Pending |
+| SCARE-01 | Phase 5 | Complete |
+| SCARE-02 | Phase 5 | Complete |
+| SCARE-03 | Phase 5 | Complete |
 | ENV-01 | Phase 6 | Pending |
 | ENV-02 | Phase 6 | Pending |
 | QUAL-01 | Phase 7 | Pending |
