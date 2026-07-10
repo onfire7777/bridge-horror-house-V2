@@ -11,7 +11,7 @@ This milestone hardens the existing browser game in dependency order: establish 
 - [x] **Phase 3: Hunt Balance and Resource Fairness** - Tune escalating pursuit, flashlight economy, and seeded key placement against legal route lengths.
 - [x] **Phase 4: Audio Buses Persistence and Settings UI** - Put every source under persistent, accessible semantic controls and a safe final mix.
 - [x] **Phase 5: Capture and Sound-Safety Orchestration** - Deliver one cancellable full-screen jumpscare with controlled layered loudness and motion safety.
-- [ ] **Phase 6: BridgeMind Environment and Detailed Sound** - Add readable branded storytelling and a complete category-safe gameplay cue language.
+- [x] **Phase 6: BridgeMind Environment and Detailed Sound** - Add readable branded storytelling and a complete category-safe gameplay cue language.
 - [ ] **Phase 7: Production Verification and Tuning** - Prove the integrated experience in the production build, tune it from evidence, and verify Git parity.
 
 ## Phase Details
@@ -94,7 +94,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. Critical audio states also have visible feedback, so the player can understand danger, battery, collection, and capture information without sound alone.
   3. Every major room contains a readable BridgeMind focal artifact and a secondary permission-safe detail that support environmental storytelling rather than decorative noise.
   4. The player can still traverse, find keys, read interactions, and track Matt after enrichment, with no new accidental blocker or material performance regression.
-**Plans**: 1 plan
+**Plans**: 1/1 complete
 **UI hint**: yes
 
 ### Phase 7: Production Verification and Tuning
@@ -122,5 +122,5 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | 3. Hunt Balance and Resource Fairness | 1/1 | Complete | 2026-07-10 |
 | 4. Audio Buses Persistence and Settings UI | 1/1 | Complete | 2026-07-10 |
 | 5. Capture and Sound-Safety Orchestration | 1/1 | Complete | 2026-07-10 |
-| 6. BridgeMind Environment and Detailed Sound | 0/1 | In progress | - |
+| 6. BridgeMind Environment and Detailed Sound | 1/1 | Complete | 2026-07-10 |
 | 7. Production Verification and Tuning | 0/TBD | Not started | - |
