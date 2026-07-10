@@ -53,6 +53,32 @@ test('findPath returns a deterministic cardinal straight path', async () => {
   assert.deepEqual(path, grid.findPath(start, goal));
 });
 
+test('cell conversion uses col and row and fails closed outside bounds', async () => {
+  const { NavigationGrid } = await loadNavigation();
+  const grid = new NavigationGrid({ bounds: BOUNDS, blockers: [], cellSize: 0.5, radius: 0, epsilon: 0 });
+  assert.deepEqual(grid.worldToCell({ x: 0.1, z: 0.1 }), { col: 0, row: 0 });
+  assert.equal(grid.worldToCell({ x: -0.01, z: 0.1 }), null);
+  assert.equal(grid.worldToCell({ x: 0.1, z: 4.01 }), null);
+  assert.deepEqual(grid.cellToWorld({ col: 0, row: 0 }), { x: 0.25, z: 0.25 });
+  assert.equal(grid.cellToWorld({ col: -1, row: 0 }), null);
+  assert.equal(grid.isWalkable({ col: -1, row: 0 }), false);
+  assert.equal(grid.nearestWalkable({ x: -0.01, z: 0.1 }), null);
+  assert.deepEqual(grid.findPath({ x: -0.01, z: 0.1 }, { x: 3, z: 3 }), []);
+});
+
+test('partial boundary cells emit centers inside configured bounds', async () => {
+  const { NavigationGrid } = await loadNavigation();
+  const grid = new NavigationGrid({
+    bounds: { minX: 0, maxX: 0.5, minZ: 0, maxZ: 0.5 },
+    blockers: [],
+    cellSize: 0.4,
+    radius: 0,
+    epsilon: 0,
+  });
+  assert.deepEqual(grid.cellToWorld({ col: 1, row: 1 }), { x: 0.45, z: 0.45 });
+  assert.deepEqual(grid.worldToCell({ x: 0.5, z: 0.5 }), { col: 1, row: 1 });
+});
+
 test('findPath detours around a solid wall', async () => {
   const { NavigationGrid } = await loadNavigation();
   const grid = new NavigationGrid({
@@ -98,6 +124,18 @@ test('findPath returns empty when a wall fully separates the goal', async () => 
   assert.deepEqual(grid.findPath({ x: 0.5, z: 2 }, { x: 3.5, z: 2 }), []);
 });
 
+test('a thin wall between adjacent cell centers blocks the connecting edge', async () => {
+  const { NavigationGrid } = await loadNavigation();
+  const grid = new NavigationGrid({
+    bounds: { minX: 0, maxX: 2, minZ: 0, maxZ: 1 },
+    blockers: [{ minX: 0.99, maxX: 1.01, minZ: 0, maxZ: 1 }],
+    cellSize: 1,
+    radius: 0,
+    epsilon: 0,
+  });
+  assert.deepEqual(grid.findPath({ x: 0.5, z: 0.5 }, { x: 1.5, z: 0.5 }), []);
+});
+
 test('cardinal routing cannot squeeze diagonally through blocked corners', async () => {
   const { NavigationGrid } = await loadNavigation();
   const grid = new NavigationGrid({
@@ -113,15 +151,27 @@ test('cardinal routing cannot squeeze diagonally through blocked corners', async
   assert.deepEqual(grid.findPath({ x: 0.5, z: 0.5 }, { x: 1.5, z: 1.5 }), []);
 });
 
-test('nearestWalkable is deterministic and reports a completely blocked grid', async () => {
+test('nearestWalkable follows north-west-east-south order and reports a blocked grid', async () => {
   const { NavigationGrid } = await loadNavigation();
-  const blocker = { minX: 1, maxX: 3, minZ: 1, maxZ: 3 };
-  const grid = new NavigationGrid({ bounds: BOUNDS, blockers: [blocker], cellSize: 0.5, radius: 0, epsilon: 0 });
-  const blockedCell = grid.worldToCell({ x: 2, z: 2 });
-  const resolved = grid.nearestWalkable(blockedCell);
-  assert.ok(resolved);
-  assert.equal(grid.isWalkable(resolved), true);
-  assert.deepEqual(resolved, grid.nearestWalkable(blockedCell));
+  const grid = new NavigationGrid({
+    bounds: { minX: 0, maxX: 3, minZ: 0, maxZ: 3 },
+    blockers: [{ minX: 1.25, maxX: 1.75, minZ: 1.25, maxZ: 1.75 }],
+    cellSize: 1,
+    radius: 0,
+    epsilon: 0,
+  });
+  assert.deepEqual(grid.nearestWalkable({ x: 1.5, z: 1.5 }), { col: 1, row: 0 });
+
+  assert.deepEqual(
+    grid.findPath({ x: 0.5, z: 2.5 }, { x: 2.5, z: 0.5 }),
+    [
+      { x: 0.5, z: 2.5 },
+      { x: 0.5, z: 1.5 },
+      { x: 0.5, z: 0.5 },
+      { x: 1.5, z: 0.5 },
+      { x: 2.5, z: 0.5 },
+    ],
+  );
 
   const sealed = new NavigationGrid({
     bounds: { minX: 0, maxX: 1, minZ: 0, maxZ: 1 },
@@ -130,7 +180,7 @@ test('nearestWalkable is deterministic and reports a completely blocked grid', a
     radius: 0,
     epsilon: 0,
   });
-  assert.equal(sealed.nearestWalkable({ x: 0, z: 0 }), null);
+  assert.equal(sealed.nearestWalkable({ x: 0.25, z: 0.25 }), null);
 });
 
 test('NavigationGrid rejects malformed or excessive allocation inputs', async () => {
@@ -138,6 +188,15 @@ test('NavigationGrid rejects malformed or excessive allocation inputs', async ()
   assert.throws(() => new NavigationGrid({ bounds: BOUNDS, blockers: [], cellSize: 0 }));
   assert.throws(() => new NavigationGrid({ bounds: { ...BOUNDS, maxX: Infinity }, blockers: [] }));
   assert.throws(() => new NavigationGrid({ bounds: BOUNDS, blockers: [], radius: -1 }));
+  assert.throws(() => new NavigationGrid({
+    bounds: BOUNDS,
+    blockers: [{ minX: 0, maxX: NaN, minZ: 0, maxZ: 1 }],
+  }));
+  assert.throws(() => new NavigationGrid({
+    bounds: { minX: -Number.MAX_VALUE, maxX: Number.MAX_VALUE, minZ: 0, maxZ: 1 },
+    blockers: [],
+    cellSize: Number.MAX_VALUE,
+  }));
   assert.throws(() => new NavigationGrid({
     bounds: { minX: 0, maxX: 10000, minZ: 0, maxZ: 10000 },
     blockers: [],
@@ -176,4 +235,48 @@ test('motion starting inside a blocker fails closed', async () => {
     moveCircleAgainstAabbs({ x: 0, z: 0 }, { x: 3, z: 0 }, [wall]),
     { x: 0, z: 0 },
   );
+});
+
+test('exact-radius contact is blocking and zero motion returns a fresh copy', async () => {
+  const { moveCircleAgainstAabbs } = await loadNavigation();
+  const wall = { minX: 1, maxX: 2, minZ: -1, maxZ: 1 };
+  const position = { x: 0.5, z: 0 };
+  const stopped = moveCircleAgainstAabbs(position, { x: 0.1, z: 0 }, [wall], {
+    radius: 0.5,
+    epsilon: 0,
+    maxSubstep: 0.1,
+  });
+  assert.deepEqual(stopped, position);
+  const copy = moveCircleAgainstAabbs(position, { x: 0, z: 0 }, []);
+  assert.deepEqual(copy, position);
+  assert.notEqual(copy, position);
+});
+
+test('motion accepts 4096 substeps and rejects 4097', async () => {
+  const { moveCircleAgainstAabbs } = await loadNavigation();
+  assert.deepEqual(
+    moveCircleAgainstAabbs({ x: 0, z: 0 }, { x: 4096, z: 0 }, [], { maxSubstep: 1 }),
+    { x: 4096, z: 0 },
+  );
+  assert.throws(() => moveCircleAgainstAabbs(
+    { x: 0, z: 0 },
+    { x: 4097, z: 0 },
+    [],
+    { maxSubstep: 1 },
+  ));
+});
+
+test('derived arithmetic overflow fails closed', async () => {
+  const { inflateAabb, moveCircleAgainstAabbs } = await loadNavigation();
+  assert.throws(() => inflateAabb(
+    { minX: 0, maxX: Number.MAX_VALUE, minZ: 0, maxZ: 1 },
+    Number.MAX_VALUE,
+    0,
+  ));
+  assert.throws(() => moveCircleAgainstAabbs(
+    { x: Number.MAX_VALUE, z: 0 },
+    { x: Number.MAX_VALUE, z: 0 },
+    [],
+    { maxSubstep: Number.MAX_VALUE },
+  ));
 });

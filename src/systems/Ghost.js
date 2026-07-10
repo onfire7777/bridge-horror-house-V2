@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import mattBillboardURL from '../assets/matt-billboard.png?url';
 import { BOUNDS } from '../world/House.js';
+import { moveCircleAgainstAabbs } from './Navigation.js';
 
 const CHASE_SPEED = 3.3;
 const STALK_SPEED = 1.25;
@@ -8,6 +9,9 @@ const CATCH_DIST = 0.75;
 const BURN_TIME_STALK = 1.6;   // seconds of beam to banish a stalker
 const BURN_TIME_CHASE = 2.4;   // he is stronger once fully awake
 const BANISH_DOWNTIME = 8;     // chase: seconds before he reforms
+const GHOST_RADIUS = 0.32;
+const COLLISION_EPSILON = 0.01;
+const MAX_MOTION_SUBSTEP = 0.1;
 
 export class Ghost {
   constructor(scene) {
@@ -111,7 +115,7 @@ export class Ghost {
   /* ---------------- update ---------------- */
 
   /** @returns true the moment the player is caught */
-  update(dt, playerPos, t) {
+  update(dt, playerPos, t, staticColliders = []) {
     if (this.mode === 'banished') {
       this.banishTimer -= dt;
       if (this.banishTimer <= 0) {
@@ -128,6 +132,8 @@ export class Ghost {
     const dx = playerPos.x - this.group.position.x;
     const dz = playerPos.z - this.group.position.z;
     const dist = Math.hypot(dx, dz);
+    let motionX = 0;
+    let motionZ = 0;
 
     // Eight-frame-per-second cardboard wobble: intentionally cheap, still uncanny.
     this.bobClock += dt;
@@ -139,8 +145,8 @@ export class Ghost {
     this.group.scale.set(breathe, breathe, breathe);
 
     if (this.burning) {
-      this.group.position.x += (Math.random() - 0.5) * 0.05;
-      this.group.position.z += (Math.random() - 0.5) * 0.05;
+      motionX += (Math.random() - 0.5) * 0.05;
+      motionZ += (Math.random() - 0.5) * 0.05;
       this.spriteMat.color.setHex(Math.random() > 0.35 ? 0xffffff : 0xff6b35);
       this.spriteMat.opacity = 0.55 + Math.random() * 0.45;
     } else {
@@ -156,22 +162,31 @@ export class Ghost {
       return false;
     }
 
-    // ----- movement: glides through walls, lurching, never smooth -----
+    // ----- movement: blocker-safe, lurching, never smooth -----
     const slow = this.burning ? 0.3 : 1;
     const base = this.mode === 'chase' ? CHASE_SPEED : STALK_SPEED;
     const lurch = 1 + Math.sin(this.bobClock * 8.5) * 0.55;   // surging gait
     if (dist > 0.001) {
       const step = Math.min(base * slow * lurch * dt, dist);
-      this.group.position.x += (dx / dist) * step;
-      this.group.position.z += (dz / dist) * step;
+      motionX += (dx / dist) * step;
+      motionZ += (dz / dist) * step;
       // lateral drift so he weaves at you
       if (this.mode === 'chase') {
         const px = -dz / dist, pz = dx / dist;
         const sway = Math.sin(this.bobClock * 2.7) * 0.5 * dt;
-        this.group.position.x += px * sway;
-        this.group.position.z += pz * sway;
+        motionX += px * sway;
+        motionZ += pz * sway;
       }
     }
+
+    const next = moveCircleAgainstAabbs(
+      this.group.position,
+      { x: motionX, z: motionZ },
+      staticColliders,
+      { radius: GHOST_RADIUS, epsilon: COLLISION_EPSILON, maxSubstep: MAX_MOTION_SUBSTEP },
+    );
+    this.group.position.x = next.x;
+    this.group.position.z = next.z;
 
     if (this.mode === 'stalk') {
       this.stalkTimer -= dt;

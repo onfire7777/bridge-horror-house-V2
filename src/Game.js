@@ -310,7 +310,7 @@ export class Game {
       this.player.update(dt, this.house.getColliders());
       this.director.update(dt, this.player.position);
 
-      const caught = this.ghost.update(dt, this.player.position, t);
+      const caught = this.ghost.update(dt, this.player.position, t, this.house.staticColliders);
       if (caught) {
         this._onCaught();
         this.composer.render();
