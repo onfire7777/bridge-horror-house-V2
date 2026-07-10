@@ -80,7 +80,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. Jumpscare intensity changes the force of the sting, master mute silences it completely, and the final mix feels loud without uncontrolled clipping.
   3. Repeated or cancelled capture calls never stack transitions, timers, sounds, ducking, or stale screen state, and a new run starts cleanly.
   4. Reduced-motion preference removes nonessential lunge, jitter, and shake, while the static impact remains strong without unsafe large-area flashing.
-**Plans**: TBD
+**Plans**: 1 plan
 **UI hint**: yes
 
 ### Phase 6: BridgeMind Environment and Detailed Sound
@@ -121,6 +121,6 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | 2. Ghost Routing Doors and Spatial Validity | 1/1 | Complete | 2026-07-10 |
 | 3. Hunt Balance and Resource Fairness | 1/1 | Complete | 2026-07-10 |
 | 4. Audio Buses Persistence and Settings UI | 1/1 | Complete | 2026-07-10 |
-| 5. Capture and Sound-Safety Orchestration | 0/TBD | Not started | - |
+| 5. Capture and Sound-Safety Orchestration | 0/1 | In progress | - |
 | 6. BridgeMind Environment and Detailed Sound | 0/TBD | Not started | - |
 | 7. Production Verification and Tuning | 0/TBD | Not started | - |

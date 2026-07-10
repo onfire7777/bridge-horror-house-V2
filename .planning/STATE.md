@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-07-10)
 ## Current Position
 
 Phase: 5 of 7 (Capture and Sound-Safety Orchestration)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-07-10 — Verified persistent semantic audio buses and isolated title/pause controls.
+Plan: 0 of 1 in current phase
+Status: Implementing
+Last activity: 2026-07-10 — Planned atomic capture lifecycle, bus-safe sting, full-screen threat, and reduced motion.
 
 Progress: [██████░░░░] 57%
 
