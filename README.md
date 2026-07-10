@@ -1,10 +1,10 @@
-# Bridge Horror House
+# BridgeMind Horror House
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-A first-person haunted-house escape game that runs entirely in the browser. You wake
-up locked inside an abandoned house at night. Three brass keys are hidden in the dark
-rooms. Find them, unlock the front door, and get out — you are not alone.
+A first-person parody-horror escape game that runs entirely in the browser. You wake
+up locked inside an abandoned BridgeMind production build. Recover three access keys,
+survive a deliberately cheap 2D Matt cutout, and ship yourself out of the house.
 
 Built by [BridgeMind](https://bridgemind.ai) using the design constitution in
 [`SYSTEM_PROMPT.md`](./SYSTEM_PROMPT.md) — the exact system prompt used to create
@@ -43,7 +43,7 @@ npm run preview  # serve the production build
 2. Find the 3 brass keys — locations are **randomized each run** within the kitchen,
    study, and bedroom
 3. Read the notes for lore and hints
-4. After the 2nd key, he starts **stalking** you — he manifests nearby and drifts
+4. After the 2nd key, Matt starts **stalking** you — his flat cutout manifests nearby and drifts
    toward you through walls
 5. Taking the final key wakes him fully — blackout, then a chase to the front door
 
@@ -57,19 +57,19 @@ npm run preview  # serve the production build
   hallway, kitchen)
 - Below 20% the bulb sputters; at 0% you're in the dark until you find spares
 
-If he touches you, the house keeps you. Click **Try Again**.
+If he touches you, the build token-maxxes you. Click **Run The Loop Again**.
 
 ## Tech
 
 - **Three.js** (WebGL2) + **Vite**, vanilla JavaScript — `three` is the only dependency
-- **Zero asset files**: every texture is painted procedurally on `<canvas>` (wood
-  floors, wallpaper, plaster, portraits, the entity's face), and every sound is
-  synthesized with the Web Audio API (drones, rain, thunder, whispers, heartbeat,
-  chase music, the scream)
+- A hybrid asset pipeline: the house textures and most audio remain procedural, while
+  the Matt billboard and short stream-sourced music/voice clips are bundled locally;
+  see [`src/assets/README.md`](./src/assets/README.md) for provenance and timestamps
 - ACES filmic tone mapping, exponential fog, bloom post-processing, PCF soft shadows
   from a single swaying flashlight, dust motes, film grain + vignette overlays
 - One-shot scripted scares, randomized ambient dread, lightning through windows,
-  stalking phase, and a finale chase where the entity glides through walls
+  stalking phase, a proximity-mixed BridgeMind techno loop, and a finale chase where
+  the camera-facing cutout glides through walls
 
 ## Project structure
 
@@ -80,6 +80,7 @@ bridge-horror-house/
 ├── src/
 │   ├── main.js
 │   ├── Game.js
+│   ├── assets/        # Matt billboard + short, source-documented stream clips
 │   ├── world/         # House.js, Textures.js
 │   ├── player/        # Player.js
 │   ├── systems/       # AudioEngine, Ghost, ScareDirector
@@ -93,4 +94,5 @@ Issues and pull requests are welcome. Keep changes scoped to this game — see
 
 ## License
 
-[MIT](./LICENSE) — Copyright (c) 2026 BridgeMind
+[MIT](./LICENSE) — Copyright (c) 2026 BridgeMind. Third-party likeness, branding,
+and stream excerpts under `src/assets/` are excluded; see the asset notice.

@@ -1,9 +1,23 @@
+import technoLoopURL from '../assets/bridgemind-techno-loop.wav?url';
+import letsGoChatURL from '../assets/voice/lets-go-chat.wav?url';
+import letsGoLoopURL from '../assets/voice/lets-go-loop.wav?url';
+import tokenEfficientURL from '../assets/voice/token-efficient.wav?url';
+import whatIsThatURL from '../assets/voice/what-is-that.wav?url';
+import lGhostChatURL from '../assets/voice/l-ghost-chat.wav?url';
+import notScaryURL from '../assets/voice/not-scary-at-all.wav?url';
+
+const VOICE_CLIP_URLS = [
+  letsGoChatURL,
+  letsGoLoopURL,
+  tokenEfficientURL,
+  whatIsThatURL,
+  lGhostChatURL,
+  notScaryURL,
+];
+
 /**
- * Every sound in the game is synthesized at runtime with the Web Audio API.
- * No audio files exist. Headphones strongly recommended.
- *
- * v2: convolution reverb, rain + thunder weather bed, the entity's breathing
- * and growls, banish shrieks, a chase music layer, and a burn sizzle loop.
+ * Procedural horror sound plus short, locally bundled BridgeMind stream clips.
+ * Headphones strongly recommended.
  */
 export class AudioEngine {
   constructor() {
@@ -27,11 +41,53 @@ export class AudioEngine {
 
     this.heartbeatTimer = null;
     this.chaseTimer = null;
+    this.chaseSource = null;
+    this.chaseBuffer = null;
+    this.chaseWanted = false;
+    this.voiceBuffers = [];
+    this.lastVoiceIndex = -1;
+
+    this.chaseGain = this.ctx.createGain();
+    this.chaseGain.gain.value = 0.0001;
+    this.chaseGain.connect(this.master);
+
     this._noiseBuffer = this._makeNoise(2);
+    this._loadStreamAudio();
   }
 
   resume() { if (this.ctx.state === 'suspended') this.ctx.resume(); }
   get now() { return this.ctx.currentTime; }
+
+  async _loadStreamAudio() {
+    try {
+      const decode = async (url) => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Audio asset failed: ${response.status}`);
+        return this.ctx.decodeAudioData(await response.arrayBuffer());
+      };
+      const [chaseBuffer, ...voiceBuffers] = await Promise.all([
+        technoLoopURL,
+        ...VOICE_CLIP_URLS,
+      ].map(decode));
+      this.chaseBuffer = chaseBuffer;
+      this.voiceBuffers = voiceBuffers;
+      if (this.chaseWanted) this._startStreamLoop();
+    } catch (error) {
+      // Procedural audio remains a complete fallback if a browser rejects WAV decoding.
+      console.warn('BridgeMind stream audio unavailable; using synth fallback.', error);
+    }
+  }
+
+  _startStreamLoop() {
+    if (!this.chaseBuffer || this.chaseSource) return;
+    const source = this.ctx.createBufferSource();
+    source.buffer = this.chaseBuffer;
+    source.loop = true;
+    source.connect(this.chaseGain);
+    source.start();
+    source.onended = () => { if (this.chaseSource === source) this.chaseSource = null; };
+    this.chaseSource = source;
+  }
 
   /* ================= primitives ================= */
 
@@ -263,6 +319,8 @@ export class AudioEngine {
   /* ----- chase music — dissonant pounding ostinato ----- */
 
   startChaseMusic() {
+    this.chaseWanted = true;
+    this._startStreamLoop();
     if (this.chaseTimer) return;
     let step = 0;
     const tick = () => {
@@ -278,7 +336,7 @@ export class AudioEngine {
         const g = this.ctx.createGain();
         this._env(g, t, 0.005, 0.085, 0.16);
         o.connect(lp); lp.connect(g);
-        this._out(g, 0.18);
+        g.connect(this.chaseGain);
         o.start(t); o.stop(t + 0.22);
       }
       // shrieking violin tremolo stab every other bar
@@ -297,7 +355,7 @@ export class AudioEngine {
         const g = this.ctx.createGain();
         this._env(g, t, 0.03, 0.05, 0.85);
         o.connect(sh); sh.connect(g);
-        this._out(g, 0.4);
+        g.connect(this.chaseGain);
         o.start(t); o.stop(t + 1);
         am.start(t); am.stop(t + 1);
       }
@@ -309,6 +367,38 @@ export class AudioEngine {
 
   stopChaseMusic() {
     if (this.chaseTimer) { clearInterval(this.chaseTimer); this.chaseTimer = null; }
+    this.chaseWanted = false;
+    this.setChaseIntensity(0);
+    if (this.chaseSource) {
+      this.chaseSource.stop(this.now + 0.15);
+      this.chaseSource = null;
+    }
+  }
+
+  setChaseIntensity(level) {
+    const intensity = Math.max(0, Math.min(1, level));
+    const gain = intensity === 0 ? 0.0001 : 0.025 + intensity * 0.62;
+    this.chaseGain.gain.cancelScheduledValues(this.now);
+    this.chaseGain.gain.setTargetAtTime(gain, this.now, intensity > 0 ? 0.1 : 0.22);
+  }
+
+  playRandomCatchphrase() {
+    if (!this.voiceBuffers.length) {
+      this.scream();
+      return;
+    }
+    let index = Math.floor(Math.random() * this.voiceBuffers.length);
+    if (this.voiceBuffers.length > 1 && index === this.lastVoiceIndex) {
+      index = (index + 1 + Math.floor(Math.random() * (this.voiceBuffers.length - 1))) % this.voiceBuffers.length;
+    }
+    this.lastVoiceIndex = index;
+    const source = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    source.buffer = this.voiceBuffers[index];
+    gain.gain.value = 1.15;
+    source.connect(gain);
+    gain.connect(this.master);
+    source.start();
   }
 
   /* ================= one-shots ================= */

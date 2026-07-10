@@ -351,35 +351,53 @@ export function flashlightCookie() {
   return tex;
 }
 
-/** Old portrait painting — dim hooded figure. */
+let bridgeMindPortrait;
+
+/** Corrupted BridgeMind office poster, repeated throughout the house. */
 export function portrait() {
+  if (bridgeMindPortrait) return bridgeMindPortrait;
   const c = makeCanvas(256, 320);
   const ctx = c.getContext('2d');
-  let grad = ctx.createLinearGradient(0, 0, 0, 320);
-  grad.addColorStop(0, '#241c12');
-  grad.addColorStop(1, '#0d0a06');
+  const grad = ctx.createLinearGradient(0, 0, 256, 320);
+  grad.addColorStop(0, '#11171c');
+  grad.addColorStop(0.55, '#080a0d');
+  grad.addColorStop(1, '#210505');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 320);
-  // shoulders
-  ctx.fillStyle = '#0a0805';
-  ctx.beginPath();
-  ctx.ellipse(128, 320, 120, 110, 0, Math.PI, Math.PI * 2);
-  ctx.fill();
-  // dim face
-  ctx.save();
-  ctx.translate(128, 150);
-  ctx.scale(0.42, 0.42);
-  ctx.translate(-128, -128);
-  drawFace(ctx, 256, 0.45);
-  ctx.restore();
-  // dark hood over face
-  ctx.fillStyle = 'rgba(5,4,3,0.55)';
-  ctx.beginPath();
-  ctx.ellipse(128, 110, 70, 64, 0, Math.PI, Math.PI * 2);
-  ctx.fill();
-  // varnish cracks
-  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-  for (let k = 0; k < 16; k++) {
+
+  // The blue/orange split mark echoes the stream overlay without becoming a clean ad.
+  ctx.fillStyle = '#36b8d4';
+  ctx.beginPath(); ctx.moveTo(30, 24); ctx.lineTo(66, 10); ctx.lineTo(52, 47); ctx.lineTo(24, 62); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#f28b30';
+  ctx.beginPath(); ctx.moveTo(52, 47); ctx.lineTo(66, 10); ctx.lineTo(88, 37); ctx.lineTo(59, 70); ctx.closePath(); ctx.fill();
+
+  ctx.font = 'bold 27px Arial';
+  ctx.fillStyle = '#e9edf0';
+  ctx.fillText('BRIDGE', 22, 103);
+  ctx.fillStyle = '#f28b30';
+  ctx.fillText('MIND', 132, 103);
+  ctx.font = 'bold 10px monospace';
+  ctx.fillStyle = '#7d929b';
+  ctx.fillText('THE VIBE CODING NIGHTMARE', 22, 124);
+
+  ctx.strokeStyle = '#762020';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(20, 148, 216, 78);
+  ctx.font = 'bold 29px monospace';
+  ctx.fillStyle = '#d8d8d2';
+  ctx.fillText('TOKEN', 67, 183);
+  ctx.fillStyle = '#a82626';
+  ctx.fillText('MAXXING', 48, 216);
+
+  ctx.font = 'bold 12px monospace';
+  ctx.fillStyle = '#f28b30';
+  ctx.fillText('STOP TYPING.', 72, 266);
+  ctx.fillStyle = '#e9edf0';
+  ctx.fillText('START SHIPPING.', 60, 285);
+
+  // Varnish cracks and corrupted scan lines keep it inside the horror world.
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  for (let k = 0; k < 18; k++) {
     let x = rand(0, 256), y = rand(0, 320);
     ctx.lineWidth = 0.5;
     ctx.beginPath();
@@ -387,9 +405,14 @@ export function portrait() {
     for (let s = 0; s < 6; s++) { x += rand(-25, 25); y += rand(-25, 25); ctx.lineTo(x, y); }
     ctx.stroke();
   }
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  for (let y = 136; y < 314; y += 17) {
+    ctx.fillStyle = `rgba(130,0,0,${rand(0.04, 0.13)})`;
+    ctx.fillRect(rand(-12, 22), y, rand(120, 265), rand(1, 4));
+  }
+
+  bridgeMindPortrait = new THREE.CanvasTexture(c);
+  bridgeMindPortrait.colorSpace = THREE.SRGBColorSpace;
+  return bridgeMindPortrait;
 }
 
 /** Old paper note texture (for 3D note meshes). */

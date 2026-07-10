@@ -450,9 +450,9 @@ export class House {
     this._battery(9.5, 1.0, -6.7);    // kitchen counter
 
     this._note(1.9, 0.785, 7.3,
-      'They sealed every window from the outside.\n\nThe front door has three locks now. I hid the keys somewhere in the kitchen, the study, the bedroom — I keep moving them so HE cannot gather them.\n\nIf you are reading this — do not let him hear you run.');
+      'BRIDGEMIND INCIDENT LOG 001.\n\nThe build would not stop looping. At 3:17 AM it named itself MATT and asked the chat for more tokens.\n\nI revoked three access keys — kitchen, study, bedroom. Find them before he starts shipping again.\n\nIf you hear techno, he has found your context window.');
     this._note(-7.4, 0.795, -6.3,
-      'Night 41.\n\nHe cannot stand the light. Hold your beam on him — HOLD IT, do not blink — and he comes apart like smoke.\n\nBut the light eats batteries, and taking what is his only makes him angrier. The last key wakes him fully.\n\nGod forgive me, I am going to try tonight.');
+      'TOKEN BUDGET: CRITICAL.\n\nHe cannot stand the light. Hold the beam on the white outline — HOLD IT, do not blink — and the cutout loses coherence.\n\nThe torch eats tokens. The last access key wakes the production agent fully.\n\nWhatever he says, do not type LETS GO in the chat.');
   }
 
   _battery(x, y, z) {

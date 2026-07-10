@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bridge Horror House</title>
+  <title>BridgeMind Horror House</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -35,15 +35,20 @@
     }
     #title-screen h1 {
       font-size: clamp(2.6rem, 8vw, 6rem); font-weight: 400; letter-spacing: 0.18em;
-      color: #6d0f0f; text-transform: uppercase;
-      text-shadow: 0 0 24px rgba(140, 10, 10, 0.55), 0 0 80px rgba(90, 0, 0, 0.4);
+      color: #d87528; text-transform: uppercase;
+      text-shadow: -3px 0 0 rgba(45,184,212,0.35), 3px 0 0 rgba(125,0,0,0.75), 0 0 80px rgba(90,0,0,0.55);
       animation: titleFlicker 6s infinite;
     }
     @keyframes titleFlicker {
       0%, 100% { opacity: 1; } 92% { opacity: 1; }
       93% { opacity: 0.35; } 94% { opacity: 1; } 96% { opacity: 0.5; } 97% { opacity: 1; }
     }
-    #title-screen .sub { margin-top: 14px; font-size: 1.05rem; letter-spacing: 0.4em; color: #5d5142; text-transform: uppercase; }
+    #title-screen .brand-lockup {
+      margin-bottom: 22px; color: #dfe7e9; font-family: Arial, sans-serif; font-weight: 800;
+      font-size: 0.85rem; letter-spacing: 0.42em; text-transform: uppercase;
+    }
+    #title-screen .brand-lockup b { color: #36b8d4; text-shadow: 5px 0 #f28b30; margin-right: 12px; }
+    #title-screen .sub { margin-top: 14px; font-size: 1.05rem; letter-spacing: 0.32em; color: #51a9b9; text-transform: uppercase; }
     #title-screen .begin { margin-top: 64px; font-size: 1.2rem; color: #9b8e78; animation: breathe 2.6s infinite; letter-spacing: 0.2em; }
     @keyframes breathe { 50% { opacity: 0.25; } }
     #title-screen .controls {
@@ -55,12 +60,12 @@
     #hud { pointer-events: none; z-index: 12; }
     #objective {
       position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
-      font-size: 0.95rem; letter-spacing: 0.25em; text-transform: uppercase; color: #8e8270;
+      font-size: 0.95rem; letter-spacing: 0.25em; text-transform: uppercase; color: #d87528;
       text-shadow: 0 0 8px #000; text-align: center;
     }
     #keys {
       position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
-      font-size: 1rem; letter-spacing: 0.5em; color: #7a6a3f; text-shadow: 0 0 8px #000;
+      font-size: 1rem; letter-spacing: 0.5em; color: #51a9b9; text-shadow: 0 0 8px #000;
     }
     #prompt {
       position: absolute; bottom: 18%; left: 50%; transform: translateX(-50%);
@@ -100,7 +105,7 @@
       content: ''; position: absolute; right: -5px; top: 2px; width: 3px; height: 4px;
       background: #4a4138;
     }
-    #battery-fill { height: 100%; width: 100%; background: #5d7a4f; transition: width 0.3s, background 0.5s; }
+    #battery-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #36b8d4, #f28b30); transition: width 0.3s, background 0.5s; }
 
     /* ----- note overlay ----- */
     #note-overlay {
@@ -121,7 +126,7 @@
       z-index: 30; display: flex; align-items: center; justify-content: center; background: #000;
     }
     #scare-face img {
-      width: 70vmin; height: 70vmin; image-rendering: auto;
+      width: min(86vw, 1100px); height: min(86vh, 820px); object-fit: contain; image-rendering: auto;
       animation: lunge 0.5s cubic-bezier(0.1, 1.4, 0.4, 1) forwards, jitter 0.08s infinite;
     }
     @keyframes lunge { from { transform: scale(0.25); opacity: 0.4; } to { transform: scale(1.6); opacity: 1; } }
@@ -134,7 +139,7 @@
       z-index: 25; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     }
     #death-screen { background: radial-gradient(ellipse at center, #1a0000 0%, #000 80%); }
-    #death-screen h1 { font-size: clamp(2.4rem, 7vw, 5rem); color: #7e1212; letter-spacing: 0.25em; text-transform: uppercase; text-shadow: 0 0 30px rgba(150,0,0,0.6); }
+    #death-screen h1 { font-size: clamp(2.4rem, 7vw, 5rem); color: #d87528; letter-spacing: 0.25em; text-transform: uppercase; text-shadow: -2px 0 #36b8d4, 0 0 30px rgba(150,0,0,0.7); }
     #win-screen { background: radial-gradient(ellipse at 50% 100%, #131c10 0%, #000 80%); }
     #win-screen h1 { font-size: clamp(2.4rem, 7vw, 5rem); color: #93a06b; letter-spacing: 0.25em; text-transform: uppercase; text-shadow: 0 0 30px rgba(120,140,70,0.4); }
     .end-screen p { margin-top: 22px; font-size: 1.05rem; color: #6e6354; letter-spacing: 0.15em; line-height: 1.9; }
@@ -174,7 +179,7 @@
     <div id="burn" class="hidden"><div id="burn-fill"></div></div>
     <div id="prompt" class="hidden"></div>
     <div id="toast"></div>
-    <div id="battery"><span>TORCH</span><div class="shell"><div id="battery-fill"></div></div></div>
+    <div id="battery"><span>TOKENS</span><div class="shell"><div id="battery-fill"></div></div></div>
   </div>
 
   <div id="note-overlay" class="overlay hidden">
@@ -187,14 +192,14 @@
   <div id="scare-face" class="overlay hidden"><img alt="" /></div>
 
   <div id="death-screen" class="overlay end-screen hidden">
-    <h1>It Found You</h1>
-    <p>The house keeps what it catches.<br/>
-    Remember: the light burns him. Hold the beam on him — and watch your batteries.</p>
-    <button id="retry-btn">Try Again</button>
+    <h1>Token Maxxed</h1>
+    <p>Matt shipped you straight into the context window.<br/>
+    L ghost? Hold the beam on the white outline — and watch your token budget.</p>
+    <button id="retry-btn">Run The Loop Again</button>
   </div>
 
   <div id="win-screen" class="overlay end-screen hidden">
-    <h1>You Escaped</h1>
+    <h1>Shipped To Prod</h1>
     <p id="win-stats"></p>
     <button id="again-btn">Enter Again</button>
   </div>
@@ -204,15 +209,16 @@
   </div>
 
   <div id="title-screen" class="overlay">
-    <h1>Bridge<br/>Horror House</h1>
-    <div class="sub">No one has left since 1924</div>
-    <div class="begin">[ Click to Enter ]</div>
+    <div class="brand-lockup"><b>◈</b> BridgeMind After Dark</div>
+    <h1>BridgeMind<br/>Horror House</h1>
+    <div class="sub">The home of the vibe coding nightmare</div>
+    <div class="begin">[ Click to Start Shipping ]</div>
     <div class="controls">
       WASD — move&nbsp;&nbsp;·&nbsp;&nbsp;MOUSE — look&nbsp;&nbsp;·&nbsp;&nbsp;SHIFT — run<br/>
       E — interact&nbsp;&nbsp;·&nbsp;&nbsp;F — flashlight<br/><br/>
-      Find the three brass keys. Unlock the front door. Get out.<br/>
-      If he comes for you — <em>hold your beam on him until he burns.</em><br/>
-      The light eats batteries. Spares are scattered through the house.
+      Recover the three access keys. Escape the production build.<br/>
+      If Matt starts token maxxing — <em>hold your beam on the white outline.</em><br/>
+      The light eats tokens. More context is scattered through the house.
     </div>
     <div class="warn">HEADPHONES RECOMMENDED · CONTAINS SUDDEN LOUD SOUNDS AND FLASHING IMAGES</div>
   </div>

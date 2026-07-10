@@ -4,7 +4,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { House } from './world/House.js';
-import { ghostFaceDataURL } from './world/Textures.js';
+import mattBillboardURL from './assets/matt-billboard.png?url';
 import { Player } from './player/Player.js';
 import { AudioEngine } from './systems/AudioEngine.js';
 import { Ghost } from './systems/Ghost.js';
@@ -114,7 +114,7 @@ export class Game {
     this.audio.resume();
     this.audio.startAmbient();
     this.hud.show();
-    this.hud.setObjective('Find the three brass keys');
+    this.hud.setObjective('Recover the three BridgeMind access keys');
     this.hud.setKeys(0, TOTAL_KEYS);
     this.hud.setBattery(this.player.battery);
     this.canvas.requestPointerLock();
@@ -128,12 +128,13 @@ export class Game {
     this.state = 'caught';
     this.player.enabled = false;
     document.exitPointerLock();
-    this.audio.scream();
+    this.audio.stinger(1.2);
+    this.audio.playRandomCatchphrase();
     this.audio.stopHeartbeat();
     this.audio.stopChaseMusic();
     this.audio.setBreathLevel(0);
     this.audio.setSizzle(0);
-    this.hud.jumpscare(ghostFaceDataURL());
+    this.hud.jumpscare(mattBillboardURL);
     this.hud.shake();
     setTimeout(() => {
       this.hud.hideJumpscare();
@@ -158,7 +159,7 @@ export class Game {
       ? `<br/>You drove him back ${this.banishes} time${this.banishes === 1 ? '' : 's'} with nothing but a flashlight.`
       : '';
     document.getElementById('win-stats').innerHTML =
-      `You found all three keys and walked out of the dark.${banishLine}<br/>Time inside the house: ${m}:${String(s).padStart(2, '0')}`;
+      `You shipped all three keys and escaped the build.${banishLine}<br/>Time to production: ${m}:${String(s).padStart(2, '0')}`;
     this.hud.hide();
     this.hud.setDanger(false);
     document.getElementById('win-screen').classList.remove('hidden');
@@ -310,25 +311,37 @@ export class Game {
       this.director.update(dt, this.player.position);
 
       const caught = this.ghost.update(dt, this.player.position, t);
-      if (caught) this._onCaught();
+      if (caught) {
+        this._onCaught();
+        this.composer.render();
+        return;
+      }
 
       this._updateBurn(dt);
       this.hud.setBattery(this.player.battery);
 
-      // his breathing closes in with him
+      let ghostDistance = Infinity;
+
+      // His breathing and the BridgeMind stream loop close in together.
       if (this.ghost.engaged) {
-        const d = this.ghost.distanceTo(this.player.position);
-        this.audio.setBreathLevel(THREE.MathUtils.clamp(1.3 - d / 9, 0, 1));
+        ghostDistance = this.ghost.distanceTo(this.player.position);
+        const proximity = THREE.MathUtils.clamp(1 - ghostDistance / 12, 0, 1);
+        this.audio.startChaseMusic();
+        this.audio.setChaseIntensity(proximity * proximity);
+        this.audio.setBreathLevel(THREE.MathUtils.clamp(1.3 - ghostDistance / 9, 0, 1));
         this.hud.setDanger(true);
       } else {
         this.audio.setBreathLevel(0);
+        this.audio.setChaseIntensity(0);
+        if (!this.chaseActive) this.audio.stopChaseMusic();
         if (!this.chaseActive) this.hud.setDanger(false);
       }
 
       // heartbeat tempo scales with how close he is
-      if (this.chaseActive && this.ghost.mode !== 'hidden') {
-        const d = this.ghost.distanceTo(this.player.position);
-        this.audio.startHeartbeat(Math.round(THREE.MathUtils.clamp(160 - d * 9, 88, 160) / 8) * 8);
+      if (this.chaseActive && this.ghost.engaged) {
+        this.audio.startHeartbeat(Math.round(THREE.MathUtils.clamp(160 - ghostDistance * 9, 88, 160) / 8) * 8);
+      } else if (this.chaseActive) {
+        this.audio.stopHeartbeat();
       }
 
       // interact prompt
