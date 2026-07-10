@@ -90,25 +90,42 @@
 
 ## Traceability
 
-Roadmap phase ownership is populated during roadmap creation. Every v1 requirement must map to exactly one phase before implementation begins.
+Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting delivery discipline, but Phase 7 owns its traceability and final parity evidence.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NAV-01..05 | Pending roadmap | Pending |
-| HUNT-01..03 | Pending roadmap | Pending |
-| BATT-01..02 | Pending roadmap | Pending |
-| KEY-01..02 | Pending roadmap | Pending |
-| AUD-01..04 | Pending roadmap | Pending |
-| SCARE-01..03 | Pending roadmap | Pending |
-| ENV-01..02 | Pending roadmap | Pending |
-| QUAL-01..03 | Pending roadmap | Pending |
-| GIT-01 | All phases | In Progress |
+| NAV-01 | Phase 1 | Pending |
+| NAV-02 | Phase 2 | Pending |
+| NAV-03 | Phase 2 | Pending |
+| NAV-04 | Phase 2 | Pending |
+| NAV-05 | Phase 2 | Pending |
+| HUNT-01 | Phase 3 | Pending |
+| HUNT-02 | Phase 3 | Pending |
+| HUNT-03 | Phase 3 | Pending |
+| BATT-01 | Phase 3 | Pending |
+| BATT-02 | Phase 3 | Pending |
+| KEY-01 | Phase 3 | Pending |
+| KEY-02 | Phase 3 | Pending |
+| AUD-01 | Phase 4 | Pending |
+| AUD-02 | Phase 4 | Pending |
+| AUD-03 | Phase 4 | Pending |
+| AUD-04 | Phase 6 | Pending |
+| SCARE-01 | Phase 5 | Pending |
+| SCARE-02 | Phase 5 | Pending |
+| SCARE-03 | Phase 5 | Pending |
+| ENV-01 | Phase 6 | Pending |
+| ENV-02 | Phase 6 | Pending |
+| QUAL-01 | Phase 7 | Pending |
+| QUAL-02 | Phase 7 | Pending |
+| QUAL-03 | Phase 7 | Pending |
+| GIT-01 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
-- Mapped to phases: 1 cross-cutting delivery requirement
-- Unmapped: 24 pending roadmap creation
+- Mapped to phases: 25
+- Unmapped: 0
+- Duplicate ownership: 0
 
 ---
 *Requirements defined: 2026-07-10*
-*Last updated: 2026-07-10 after GSD research synthesis*
+*Last updated: 2026-07-10 after roadmap creation and traceability validation*
