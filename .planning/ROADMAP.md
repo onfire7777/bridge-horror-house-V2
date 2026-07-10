@@ -6,7 +6,7 @@ This milestone hardens the existing browser game in dependency order: establish 
 
 ## Phases
 
-- [ ] **Phase 1: Navigation Geometry and Collision Foundation** - Establish deterministic house geometry, legal routes, and blocker-safe movement primitives.
+- [x] **Phase 1: Navigation Geometry and Collision Foundation** - Establish deterministic house geometry, legal routes, and blocker-safe movement primitives.
 - [ ] **Phase 2: Ghost Routing Doors and Spatial Validity** - Make Matt execute cached routes, use doors, reform legally, and capture only through valid space.
 - [ ] **Phase 3: Hunt Balance and Resource Fairness** - Tune escalating pursuit, flashlight economy, and seeded key placement against legal route lengths.
 - [ ] **Phase 4: Audio Buses Persistence and Settings UI** - Put every source under persistent, accessible semantic controls and a safe final mix.
@@ -26,7 +26,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   1. During stalking, chasing, and burn-slowed movement, the player never sees Matt enter or cross a static wall.
   2. Matt remains outside wall boundaries even at the maximum configured movement speed instead of tunneling through thin geometry.
   3. When Matt reaches a blocker, the player sees him stop or move along its boundary rather than pop through it, become embedded, or behave differently with frame rate.
-**Plans**: TBD
+**Plans**: 1/1 complete
 
 ### Phase 2: Ghost Routing Doors and Spatial Validity
 
@@ -117,7 +117,7 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Navigation Geometry and Collision Foundation | 0/TBD | Not started | - |
+| 1. Navigation Geometry and Collision Foundation | 1/1 | Complete | 2026-07-10 |
 | 2. Ghost Routing Doors and Spatial Validity | 0/TBD | Not started | - |
 | 3. Hunt Balance and Resource Fairness | 0/TBD | Not started | - |
 | 4. Audio Buses Persistence and Settings UI | 0/TBD | Not started | - |
