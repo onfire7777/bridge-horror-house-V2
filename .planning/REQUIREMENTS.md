@@ -16,10 +16,10 @@
 ### Navigation and Pursuit
 
 - [x] **NAV-01**: Matt remains outside radius-inflated wall AABBs during stalk, chase, and burn-slowed movement at the maximum configured speed.
-- [ ] **NAV-02**: Matt routes through authored hallway and doorway gaps, approaches closed doors, opens them, waits for body clearance, and crosses without phasing through the door mesh.
-- [ ] **NAV-03**: Matt replans toward the moving player on a bounded cadence and fails closed—stopping or retrying—when no legal route exists instead of reverting to direct wall traversal.
-- [ ] **NAV-04**: Matt’s initial manifestations and post-banish reforms select free, path-connected positions with a minimum legal route distance from the player.
-- [ ] **NAV-05**: A capture can occur only when Matt is within the catch radius on a legal unobstructed path segment; walls and closed doors prevent through-geometry capture.
+- [x] **NAV-02**: Matt routes through authored hallway and doorway gaps, approaches closed doors, opens them, waits for body clearance, and crosses without phasing through the door mesh.
+- [x] **NAV-03**: Matt replans toward the moving player on a bounded cadence and fails closed—stopping or retrying—when no legal route exists instead of reverting to direct wall traversal.
+- [x] **NAV-04**: Matt’s initial manifestations and post-banish reforms select free, path-connected positions with a minimum legal route distance from the player.
+- [x] **NAV-05**: A capture can occur only when Matt is within the catch radius on a legal unobstructed path segment; walls and closed doors prevent through-geometry capture.
 
 ### Hunt Difficulty
 
@@ -95,10 +95,10 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | NAV-01 | Phase 1 | Complete |
-| NAV-02 | Phase 2 | Pending |
-| NAV-03 | Phase 2 | Pending |
-| NAV-04 | Phase 2 | Pending |
-| NAV-05 | Phase 2 | Pending |
+| NAV-02 | Phase 2 | Complete |
+| NAV-03 | Phase 2 | Complete |
+| NAV-04 | Phase 2 | Complete |
+| NAV-05 | Phase 2 | Complete |
 | HUNT-01 | Phase 3 | Pending |
 | HUNT-02 | Phase 3 | Pending |
 | HUNT-03 | Phase 3 | Pending |
@@ -128,4 +128,4 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 
 ---
 *Requirements defined: 2026-07-10*
-*Last updated: 2026-07-10 after Phase 1 verification*
+*Last updated: 2026-07-10 after Phase 2 verification*
