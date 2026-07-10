@@ -10,6 +10,7 @@ import { AudioEngine } from './systems/AudioEngine.js';
 import { Ghost } from './systems/Ghost.js';
 import { NavigationGrid, selectReachableSpawn } from './systems/Navigation.js';
 import { BATTERY_RULES, batteryBand } from './systems/RunRules.js';
+import { loadAudioSettings, normalizeAudioSettings, saveAudioSettings } from './systems/AudioSettings.js';
 import { ScareDirector } from './systems/ScareDirector.js';
 import { HUD } from './ui/HUD.js';
 
@@ -53,7 +54,8 @@ export class Game {
     this._setupScene();
 
     this.hud = new HUD();
-    this.audio = new AudioEngine();
+    this.audioSettings = loadAudioSettings();
+    this.audio = new AudioEngine(this.audioSettings);
     this.house = new House(this.scene, { seed: this.runSeed });
     this.navigation = new NavigationGrid({
       bounds: BOUNDS,
@@ -73,6 +75,7 @@ export class Game {
     this.raycaster.far = 2.6;
 
     this._bindEvents();
+    this._bindAudioSettings();
 
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop(() => this._tick());
@@ -124,7 +127,7 @@ export class Game {
         document.getElementById('pause-screen').classList.add('hidden');
       }
     });
-    document.getElementById('pause-screen').addEventListener('click', () => {
+    document.getElementById('resume-btn').addEventListener('click', () => {
       this.canvas.requestPointerLock();
     });
     document.addEventListener('keydown', (e) => {
@@ -135,6 +138,33 @@ export class Game {
     });
     document.getElementById('retry-btn').addEventListener('click', () => location.reload());
     document.getElementById('again-btn').addEventListener('click', () => location.reload());
+  }
+
+  _bindAudioSettings() {
+    const controls = [...document.querySelectorAll('[data-audio-setting]')];
+    const sync = () => {
+      for (const control of controls) {
+        const key = control.dataset.audioSetting;
+        if (control.type === 'checkbox') control.checked = this.audioSettings[key];
+        else control.value = String(this.audioSettings[key]);
+      }
+      for (const output of document.querySelectorAll('[data-audio-value]')) {
+        output.textContent = `${Math.round(this.audioSettings[output.dataset.audioValue] * 100)}%`;
+      }
+    };
+    for (const control of controls) {
+      control.addEventListener('input', () => {
+        const key = control.dataset.audioSetting;
+        this.audioSettings = normalizeAudioSettings({
+          ...this.audioSettings,
+          [key]: control.type === 'checkbox' ? control.checked : Number(control.value),
+        });
+        this.audio.applySettings(this.audioSettings);
+        saveAudioSettings(this.audioSettings);
+        sync();
+      });
+    }
+    sync();
   }
 
   /* ---------------- flow ---------------- */

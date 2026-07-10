@@ -31,7 +31,7 @@
     #title-screen {
       z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center;
       background: radial-gradient(ellipse at 50% 30%, #100a0a 0%, #000 75%);
-      cursor: pointer; text-align: center;
+      text-align: center;
     }
     #title-screen h1 {
       font-size: clamp(2.6rem, 8vw, 6rem); font-weight: 400; letter-spacing: 0.18em;
@@ -49,12 +49,23 @@
     }
     #title-screen .brand-lockup b { color: #36b8d4; text-shadow: 5px 0 #f28b30; margin-right: 12px; }
     #title-screen .sub { margin-top: 14px; font-size: 1.05rem; letter-spacing: 0.32em; color: #51a9b9; text-transform: uppercase; }
-    #title-screen .begin { margin-top: 64px; font-size: 1.2rem; color: #9b8e78; animation: breathe 2.6s infinite; letter-spacing: 0.2em; }
+    #title-screen .begin { margin-top: 30px; padding: 10px 18px; font: inherit; font-size: 1.05rem; color: #9b8e78; background: transparent; border: 1px solid #4a4138; animation: breathe 2.6s infinite; letter-spacing: 0.2em; cursor: pointer; }
     @keyframes breathe { 50% { opacity: 0.25; } }
     #title-screen .controls {
-      margin-top: 40px; font-size: 0.85rem; color: #4a4138; line-height: 1.9; letter-spacing: 0.08em;
+      margin-top: 20px; font-size: 0.78rem; color: #4a4138; line-height: 1.65; letter-spacing: 0.08em;
     }
     #title-screen .warn { position: absolute; bottom: 26px; font-size: 0.75rem; color: #3a332c; letter-spacing: 0.15em; }
+    .settings-panel {
+      width: min(620px, 88vw); margin-top: 18px; padding: 12px 16px; border: 1px solid #302a25;
+      background: rgba(5,8,9,0.82); display: grid; grid-template-columns: repeat(3, minmax(130px, 1fr)); gap: 9px 14px;
+      font: 700 0.66rem/1.2 Arial, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #766d61; text-align: left;
+    }
+    .settings-panel h2 { grid-column: 1 / -1; font-size: 0.68rem; color: #51a9b9; letter-spacing: 0.28em; }
+    .settings-panel label { display: grid; gap: 4px; }
+    .settings-panel label span { display: flex; justify-content: space-between; }
+    .settings-panel input[type="range"] { width: 100%; accent-color: #d87528; }
+    .settings-panel .mute { display: flex; align-items: center; gap: 8px; color: #b55f31; }
+    .settings-panel input:focus-visible, .begin:focus-visible, #resume-btn:focus-visible { outline: 2px solid #51a9b9; outline-offset: 3px; }
 
     /* ----- HUD ----- */
     #hud { pointer-events: none; z-index: 12; }
@@ -153,11 +164,11 @@
     .end-screen button:hover { border-color: #8a7d68; color: #d6c9b0; background: rgba(255,255,255,0.03); }
 
     /* ----- pause ----- */
-    #pause-screen {
-      z-index: 15; display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.72); cursor: pointer;
-    }
-    #pause-screen div { font-size: 1.1rem; letter-spacing: 0.3em; color: #8e8270; text-transform: uppercase; }
+    #pause-screen { z-index: 15; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.82); }
+    .pause-card { display: flex; flex-direction: column; align-items: center; }
+    .pause-card > div { font-size: 1.1rem; letter-spacing: 0.3em; color: #8e8270; text-transform: uppercase; }
+    #resume-btn { margin-top: 24px; padding: 11px 24px; border: 1px solid #4a4138; background: #090807; color: #b6aa96; font: inherit; letter-spacing: 0.2em; cursor: pointer; }
+    @media (max-width: 620px) { .settings-panel { grid-template-columns: 1fr 1fr; } #title-screen .controls { display: none; } }
 
     body.shake canvas#game { animation: shake 0.4s; }
     @keyframes shake {
@@ -207,14 +218,37 @@
   </div>
 
   <div id="pause-screen" class="overlay hidden">
-    <div>— Paused — Click to return to the dark —</div>
+    <div class="pause-card">
+      <div>— Paused —</div>
+      <section class="settings-panel" aria-label="Sound settings">
+        <h2>Sound Matrix</h2>
+        <label><span>Master <output data-audio-value="master"></output></span><input data-audio-setting="master" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>Ambience <output data-audio-value="ambience"></output></span><input data-audio-setting="ambience" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>Music <output data-audio-value="music"></output></span><input data-audio-setting="music" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>Effects <output data-audio-value="effects"></output></span><input data-audio-setting="effects" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>Voice <output data-audio-value="voice"></output></span><input data-audio-setting="voice" type="range" min="0" max="1" step="0.05" /></label>
+        <label><span>Jumpscare <output data-audio-value="jumpscare"></output></span><input data-audio-setting="jumpscare" type="range" min="0" max="1" step="0.05" /></label>
+        <label class="mute"><input data-audio-setting="muted" type="checkbox" /> Mute all</label>
+      </section>
+      <button id="resume-btn">Return to the dark</button>
+    </div>
   </div>
 
   <div id="title-screen" class="overlay">
     <div class="brand-lockup"><b>◈</b> BridgeMind After Dark</div>
     <h1>BridgeMind<br/>Horror House</h1>
     <div class="sub">The home of the vibe coding nightmare</div>
-    <div class="begin">[ Click to Start Shipping ]</div>
+    <button id="start-btn" class="begin">[ Click to Start Shipping ]</button>
+    <section class="settings-panel" aria-label="Sound settings">
+      <h2>Sound Matrix</h2>
+      <label><span>Master <output data-audio-value="master"></output></span><input data-audio-setting="master" type="range" min="0" max="1" step="0.05" /></label>
+      <label><span>Ambience <output data-audio-value="ambience"></output></span><input data-audio-setting="ambience" type="range" min="0" max="1" step="0.05" /></label>
+      <label><span>Music <output data-audio-value="music"></output></span><input data-audio-setting="music" type="range" min="0" max="1" step="0.05" /></label>
+      <label><span>Effects <output data-audio-value="effects"></output></span><input data-audio-setting="effects" type="range" min="0" max="1" step="0.05" /></label>
+      <label><span>Voice <output data-audio-value="voice"></output></span><input data-audio-setting="voice" type="range" min="0" max="1" step="0.05" /></label>
+      <label><span>Jumpscare <output data-audio-value="jumpscare"></output></span><input data-audio-setting="jumpscare" type="range" min="0" max="1" step="0.05" /></label>
+      <label class="mute"><input data-audio-setting="muted" type="checkbox" /> Mute all</label>
+    </section>
     <div class="controls">
       WASD — move&nbsp;&nbsp;·&nbsp;&nbsp;MOUSE — look&nbsp;&nbsp;·&nbsp;&nbsp;SHIFT — run<br/>
       E — interact&nbsp;&nbsp;·&nbsp;&nbsp;F — flashlight<br/><br/>

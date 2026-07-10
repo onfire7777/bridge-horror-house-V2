@@ -5,6 +5,7 @@ import tokenEfficientURL from '../assets/voice/token-efficient.wav?url';
 import whatIsThatURL from '../assets/voice/what-is-that.wav?url';
 import lGhostChatURL from '../assets/voice/l-ghost-chat.wav?url';
 import notScaryURL from '../assets/voice/not-scary-at-all.wav?url';
+import { normalizeAudioSettings } from './AudioSettings.js';
 
 const VOICE_CLIP_URLS = [
   letsGoChatURL,
@@ -20,10 +21,10 @@ const VOICE_CLIP_URLS = [
  * Headphones strongly recommended.
  */
 export class AudioEngine {
-  constructor() {
+  constructor(settings) {
     this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.settings = normalizeAudioSettings(settings);
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.9;
     const comp = this.ctx.createDynamicsCompressor();
     comp.threshold.value = -18;
     comp.knee.value = 12;
@@ -31,13 +32,21 @@ export class AudioEngine {
     this.master.connect(comp);
     comp.connect(this.ctx.destination);
 
-    // shared house reverb — a synthesized 2s decaying impulse response
-    this.reverb = this.ctx.createConvolver();
-    this.reverb.buffer = this._makeImpulse(2.1, 2.6);
-    const reverbOut = this.ctx.createGain();
-    reverbOut.gain.value = 0.5;
-    this.reverb.connect(reverbOut);
-    reverbOut.connect(this.master);
+    this.buses = {};
+    this.reverbs = {};
+    const impulse = this._makeImpulse(2.1, 2.6);
+    for (const category of ['ambience', 'music', 'effects', 'voice', 'jumpscare']) {
+      const bus = this.ctx.createGain();
+      bus.connect(this.master);
+      this.buses[category] = bus;
+      const reverb = this.ctx.createConvolver();
+      reverb.buffer = impulse;
+      const wet = this.ctx.createGain();
+      wet.gain.value = 0.5;
+      reverb.connect(wet);
+      wet.connect(bus);
+      this.reverbs[category] = reverb;
+    }
 
     this.heartbeatTimer = null;
     this.chaseTimer = null;
@@ -49,14 +58,32 @@ export class AudioEngine {
 
     this.chaseGain = this.ctx.createGain();
     this.chaseGain.gain.value = 0.0001;
-    this.chaseGain.connect(this.master);
+    this.chaseGain.connect(this.buses.music);
 
     this._noiseBuffer = this._makeNoise(2);
+    this.applySettings(this.settings, true);
     this._loadStreamAudio();
   }
 
   resume() { if (this.ctx.state === 'suspended') this.ctx.resume(); }
   get now() { return this.ctx.currentTime; }
+
+  applySettings(settings, immediate = false) {
+    this.settings = normalizeAudioSettings(settings);
+    const time = this.now;
+    const set = (param, value) => {
+      param.cancelScheduledValues(time);
+      if (immediate) param.setValueAtTime(value, time);
+      else {
+        param.setValueAtTime(param.value, time);
+        param.linearRampToValueAtTime(value, time + 0.05);
+      }
+    };
+    set(this.master.gain, this.settings.muted ? 0 : this.settings.master);
+    for (const category of ['ambience', 'music', 'effects', 'voice', 'jumpscare']) {
+      set(this.buses[category].gain, this.settings[category]);
+    }
+  }
 
   async _loadStreamAudio() {
     try {
@@ -120,14 +147,16 @@ export class AudioEngine {
     return src;
   }
 
-  /** Connect a node to the master plus a reverb send. */
-  _out(node, wet = 0.2) {
-    node.connect(this.master);
+  /** Connect one source to exactly one semantic bus and its owned wet return. */
+  _out(node, wet = 0.2, category = 'effects') {
+    const bus = this.buses[category];
+    if (!bus) throw new RangeError(`Unknown audio category: ${category}`);
+    node.connect(bus);
     if (wet > 0) {
       const send = this.ctx.createGain();
       send.gain.value = wet;
       node.connect(send);
-      send.connect(this.reverb);
+      send.connect(this.reverbs[category]);
     }
   }
 
@@ -155,7 +184,7 @@ export class AudioEngine {
     this.droneGain = this.ctx.createGain();
     this.droneGain.gain.setValueAtTime(0.0001, t);
     this.droneGain.gain.exponentialRampToValueAtTime(0.045, t + 6);
-    this._out(this.droneGain, 0.15);
+    this._out(this.droneGain, 0.15, 'ambience');
     for (const f of [48, 52.7, 96.4]) {
       const o = this.ctx.createOscillator();
       o.type = 'sine';
@@ -182,7 +211,7 @@ export class AudioEngine {
     lfoG.connect(bp.frequency);
     wind.connect(bp);
     bp.connect(wg);
-    this._out(wg, 0.25);
+    this._out(wg, 0.25, 'ambience');
     wind.start();
     lfo.start();
     // rain against the windows — hiss with slow swells
@@ -202,7 +231,7 @@ export class AudioEngine {
     rLfo.connect(rLfoG);
     rLfoG.connect(rg.gain);
     rain.connect(rainHp); rainHp.connect(rainLp); rainLp.connect(rg);
-    this._out(rg, 0.1);
+    this._out(rg, 0.1, 'ambience');
     rain.start();
     rLfo.start();
 
@@ -302,7 +331,7 @@ export class AudioEngine {
         const g = this.ctx.createGain();
         this._env(g, t, 0.012, vol, 0.16);
         o.connect(g);
-        g.connect(this.master);
+        g.connect(this.buses.effects);
         o.start(t);
         o.stop(t + 0.35);
       }
@@ -397,7 +426,7 @@ export class AudioEngine {
     source.buffer = this.voiceBuffers[index];
     gain.gain.value = 1.15;
     source.connect(gain);
-    gain.connect(this.master);
+    gain.connect(this.buses.voice);
     source.start();
   }
 
@@ -763,7 +792,7 @@ export class AudioEngine {
     bp.Q.value = 4;
     const g = this.ctx.createGain();
     this._env(g, t, 0.001, 0.12, 0.05);
-    src.connect(bp); bp.connect(g); g.connect(this.master);
+    src.connect(bp); bp.connect(g); g.connect(this.buses.effects);
     src.start(t); src.stop(t + 0.08);
   }
 
