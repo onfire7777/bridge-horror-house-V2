@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { BOUNDS, House } from './world/House.js';
+import { BOUNDS, House, ZONES } from './world/House.js';
 import mattBillboardURL from './assets/matt-billboard.png?url';
 import { Player } from './player/Player.js';
 import { AudioEngine } from './systems/AudioEngine.js';
@@ -227,6 +227,7 @@ export class Game {
     this.audio.setBreathLevel(0);
     this.audio.setSizzle(0);
     this.audio.setDroneIntensity(0);
+    this.audio.escape();
     document.exitPointerLock();
     const seconds = Math.round((performance.now() - this.startTime) / 1000);
     const m = Math.floor(seconds / 60), s = seconds % 60;
@@ -414,6 +415,11 @@ export class Game {
 
     if (this.state === 'playing') {
       this.player.update(dt, this.house.getColliders());
+      const room = Object.entries(ZONES).find(([, zone]) => (
+        this.player.position.x >= zone.minX && this.player.position.x <= zone.maxX
+        && this.player.position.z >= zone.minZ && this.player.position.z <= zone.maxZ
+      ))?.[0];
+      if (room) this.audio.setRoomTone(room);
       this.director.update(dt, this.player.position);
 
       const caught = this.ghost.update(dt, this.player.position, t, {

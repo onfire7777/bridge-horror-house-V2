@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as TX from './Textures.js';
 import { doorBlocksAtAngle } from '../systems/Navigation.js';
 import { KEY_CANDIDATES, selectKeyPlacements } from '../systems/RunRules.js';
+import { BRIDGEMIND_ROOM_DETAILS } from '../systems/EnvironmentRules.js';
 
 export const WALL_H = 3;
 export const BOUNDS = { minX: -10, maxX: 10, minZ: -8, maxZ: 8 };
@@ -319,6 +320,47 @@ export class House {
     this._cobweb(-9.6, 2.6, 7.6, 3 * Math.PI / 4);
     this._cobweb(2.7, 2.6, -1.4, -Math.PI / 4);
     this._cobweb(-3.7, 2.65, 2.4, 3 * Math.PI / 4);
+
+    for (const detail of Object.values(BRIDGEMIND_ROOM_DETAILS)) {
+      this._bridgeSign(detail.sign);
+      this._terminal(detail.terminal);
+    }
+  }
+
+  _bridgeSign(sign) {
+    const material = new THREE.MeshStandardMaterial({
+      map: TX.bridgeSign(sign.title, sign.subtitle),
+      emissive: 0x07151a,
+      emissiveIntensity: 0.75,
+      roughness: 0.55,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 0.82), material);
+    mesh.position.set(sign.position.x, sign.position.y, sign.position.z);
+    mesh.rotation.y = sign.rotationY;
+    this.scene.add(mesh);
+  }
+
+  _terminal(terminal) {
+    const group = new THREE.Group();
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(0.36, 0.05, 0.25),
+      new THREE.MeshStandardMaterial({ color: 0x10171a, metalness: 0.45, roughness: 0.5 }),
+    );
+    const screen = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.3, 0.17),
+      new THREE.MeshBasicMaterial({ color: 0x36b8d4 }),
+    );
+    screen.position.set(0, 0.13, -0.07);
+    screen.rotation.x = -0.72;
+    const status = new THREE.Mesh(
+      new THREE.BoxGeometry(0.055, 0.012, 0.055),
+      new THREE.MeshBasicMaterial({ color: 0xf28b30 }),
+    );
+    status.position.set(0.12, 0.035, 0.08);
+    group.add(base, screen, status);
+    group.position.set(terminal.position.x, terminal.position.y, terminal.position.z);
+    group.rotation.y = terminal.rotationY;
+    this.scene.add(group);
   }
 
   _candle(x, y, z) {

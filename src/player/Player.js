@@ -56,7 +56,7 @@ export class Player {
       this.keys[e.code] = true;
       if (e.code === 'KeyF' && this.enabled) {
         if (!this.flashlightOn && this.battery <= 0) {
-          this.audio?.click();
+          this.audio?.flashlightFail?.();
           return; // dead cell — nothing happens
         }
         this.flashlightOn = !this.flashlightOn;
@@ -106,7 +106,7 @@ export class Player {
       });
       if (this.battery === 0) {
         this.flashlightOn = false;
-        this.audio?.click();
+        this.audio?.flashlightFail?.();
       }
     }
 

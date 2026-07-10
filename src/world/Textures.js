@@ -415,6 +415,36 @@ export function portrait() {
   return bridgeMindPortrait;
 }
 
+export function bridgeSign(title, subtitle) {
+  const c = makeCanvas(512, 256);
+  const ctx = c.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 512, 256);
+  gradient.addColorStop(0, '#071218');
+  gradient.addColorStop(0.68, '#101318');
+  gradient.addColorStop(1, '#260b05');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 512, 256);
+  ctx.strokeStyle = '#36b8d4';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(12, 12, 488, 232);
+  ctx.fillStyle = '#36b8d4';
+  ctx.fillRect(28, 30, 38, 38);
+  ctx.fillStyle = '#f28b30';
+  ctx.fillRect(48, 50, 38, 38);
+  ctx.font = 'bold 17px monospace';
+  ctx.fillStyle = '#8da0a7';
+  ctx.fillText('AUTHORIZED CONTEXT ZONE', 105, 61);
+  ctx.font = 'bold 31px Arial';
+  ctx.fillStyle = '#f2f2eb';
+  ctx.fillText(title, 28, 137, 460);
+  ctx.font = 'bold 18px monospace';
+  ctx.fillStyle = '#f28b30';
+  ctx.fillText(subtitle, 28, 181, 455);
+  ctx.fillStyle = 'rgba(54,184,212,0.18)';
+  for (let y = 0; y < 256; y += 13) ctx.fillRect(0, y, 512, 2);
+  return toTexture(c);
+}
+
 /** Old paper note texture (for 3D note meshes). */
 export function paper() {
   const c = makeCanvas(128, 128);

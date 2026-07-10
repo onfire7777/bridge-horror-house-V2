@@ -6,6 +6,7 @@ import whatIsThatURL from '../assets/voice/what-is-that.wav?url';
 import lGhostChatURL from '../assets/voice/l-ghost-chat.wav?url';
 import notScaryURL from '../assets/voice/not-scary-at-all.wav?url';
 import { normalizeAudioSettings } from './AudioSettings.js';
+import { ROOM_TONE_FREQUENCIES } from './EnvironmentRules.js';
 
 const VOICE_CLIP_URLS = [
   letsGoChatURL,
@@ -236,6 +237,15 @@ export class AudioEngine {
     rain.start();
     rLfo.start();
 
+    this.roomTone = this.ctx.createOscillator();
+    this.roomTone.type = 'sine';
+    this.roomTone.frequency.value = ROOM_TONE_FREQUENCIES.foyer;
+    this.roomToneGain = this.ctx.createGain();
+    this.roomToneGain.gain.value = 0.014;
+    this.roomTone.connect(this.roomToneGain);
+    this._out(this.roomToneGain, 0.32, 'ambience');
+    this.roomTone.start();
+
     this._startBreath();
     this._startSizzle();
   }
@@ -244,6 +254,13 @@ export class AudioEngine {
     if (!this.droneGain) return;
     this.droneGain.gain.cancelScheduledValues(this.now);
     this.droneGain.gain.linearRampToValueAtTime(0.045 + level * 0.085, this.now + 1.5);
+  }
+
+  setRoomTone(room) {
+    if (!this.roomTone || room === this.currentRoom || !ROOM_TONE_FREQUENCIES[room]) return;
+    this.currentRoom = room;
+    this.roomTone.frequency.cancelScheduledValues(this.now);
+    this.roomTone.frequency.exponentialRampToValueAtTime(ROOM_TONE_FREQUENCIES[room], this.now + 0.8);
   }
 
   /* ----- the entity's breathing (volume follows proximity) ----- */
@@ -867,6 +884,21 @@ export class AudioEngine {
     src.start(t); src.stop(t + 0.08);
   }
 
+  flashlightFail() {
+    this.click();
+    const t = this.now;
+    const oscillator = this.ctx.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(180, t);
+    oscillator.frequency.exponentialRampToValueAtTime(38, t + 0.42);
+    const gain = this.ctx.createGain();
+    this._env(gain, t, 0.004, 0.09, 0.4);
+    oscillator.connect(gain);
+    this._out(gain, 0.08, 'effects');
+    oscillator.start(t);
+    oscillator.stop(t + 0.5);
+  }
+
   lockedRattle() {
     for (const d of [0, 0.13, 0.24]) {
       const t = this.now + d;
@@ -898,6 +930,21 @@ export class AudioEngine {
       o.connect(lp); lp.connect(g);
       this._out(g, 0.25);
       o.start(t + d); o.stop(t + d + 0.15);
+    }
+  }
+
+  escape() {
+    const t = this.now;
+    for (const [frequency, delay] of [[220, 0], [330, 0.13], [495, 0.27], [740, 0.43]]) {
+      const oscillator = this.ctx.createOscillator();
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = frequency;
+      const gain = this.ctx.createGain();
+      this._env(gain, t + delay, 0.015, 0.12, 0.7);
+      oscillator.connect(gain);
+      this._out(gain, 0.4, 'effects');
+      oscillator.start(t + delay);
+      oscillator.stop(t + delay + 0.85);
     }
   }
 
