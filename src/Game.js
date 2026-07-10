@@ -61,7 +61,7 @@ export class Game {
     this.navigation = new NavigationGrid({
       bounds: BOUNDS,
       blockers: this.house.staticColliders,
-      cellSize: 0.4,
+      cellSize: 0.25,
       radius: 0.32,
       epsilon: 0.01,
     });
@@ -135,7 +135,7 @@ export class Game {
       }
     });
     document.getElementById('resume-btn').addEventListener('click', () => {
-      this.canvas.requestPointerLock();
+      this._requestPointerLock();
     });
     document.addEventListener('keydown', (e) => {
       if (e.code === 'KeyE' && this.state === 'playing') {
@@ -145,6 +145,11 @@ export class Game {
     });
     document.getElementById('retry-btn').addEventListener('click', () => location.reload());
     document.getElementById('again-btn').addEventListener('click', () => location.reload());
+  }
+
+  _requestPointerLock() {
+    const request = this.canvas.requestPointerLock();
+    request?.catch?.(() => {});
   }
 
   _bindAudioSettings() {
@@ -185,7 +190,7 @@ export class Game {
     this.hud.setObjective('Recover the three BridgeMind access keys');
     this.hud.setKeys(0, TOTAL_KEYS);
     this.hud.setBattery(this.player.battery, this.lastBatteryBand);
-    this.canvas.requestPointerLock();
+    this._requestPointerLock();
     // an unwelcome welcome
     setTimeout(() => this.audio.doorCreak(), 1200);
     setTimeout(() => this.audio.thump(0.3), 4200);

@@ -39,3 +39,18 @@ test('cancel invalidates a stale timer and permits a clean restart', () => {
   scheduled();
   assert.deepEqual(events, ['clear:9', 'cleanup', 'cancel', 'cleanup', 'finish']);
 });
+
+test('timer adapters are invoked without rebinding their receiver', () => {
+  let scheduled;
+  const sequence = new CaptureSequence({
+    setTimer: function setTimer(callback) {
+      assert.equal(this, undefined);
+      scheduled = callback;
+      return 1;
+    },
+    clearTimer: function clearTimer() { assert.equal(this, undefined); },
+  });
+  sequence.start();
+  sequence.cancel();
+  scheduled();
+});

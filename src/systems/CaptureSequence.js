@@ -1,8 +1,8 @@
 export class CaptureSequence {
   constructor({
     duration = 1800,
-    setTimer = setTimeout,
-    clearTimer = clearTimeout,
+    setTimer = (callback, milliseconds) => setTimeout(callback, milliseconds),
+    clearTimer = (timer) => clearTimeout(timer),
     onStart = () => null,
     onFinish = () => {},
     onCancel = () => {},
@@ -30,7 +30,7 @@ export class CaptureSequence {
       this.active = false;
       throw error;
     }
-    this.timer = this.setTimer(() => this._finish(generation), this.duration);
+    this.timer = Reflect.apply(this.setTimer, undefined, [() => this._finish(generation), this.duration]);
     return true;
   }
 
@@ -51,7 +51,7 @@ export class CaptureSequence {
   cancel() {
     if (!this.active) return false;
     this.generation++;
-    if (this.timer !== null) this.clearTimer(this.timer);
+    if (this.timer !== null) Reflect.apply(this.clearTimer, undefined, [this.timer]);
     this._release();
     this.onCancel();
     return true;

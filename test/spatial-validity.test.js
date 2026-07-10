@@ -60,7 +60,8 @@ test('spawn selection requires a connected route with minimum legal distance', (
   const candidates = [{ x: 2, z: 1 }, { x: 7, z: 1 }, { x: 7, z: 7 }];
   const spawn = selectReachableSpawn(grid, player, candidates, { minRouteDistance: 8, random: () => 0 });
 
-  assert.deepEqual(spawn.position, candidates[1]);
+  assert.ok(spawn.position.x > 4);
+  assert.equal(grid.isWalkable(grid.worldToCell(spawn.position)), true);
   assert.ok(spawn.routeDistance >= 8);
 });
 
@@ -74,4 +75,21 @@ test('spawn selection fails closed when candidates are unreachable or too close'
     { minRouteDistance: 4, random: () => 0 },
   );
   assert.equal(result, null);
+});
+
+test('production-resolution grid preserves the authored 1.4 meter door portal', () => {
+  const wallSegments = [
+    { minX: -10, maxX: -7.9, minZ: -1.125, maxZ: -0.875 },
+    { minX: -6.5, maxX: 10, minZ: -1.125, maxZ: -0.875 },
+  ];
+  const grid = new NavigationGrid({
+    bounds: { minX: -10, maxX: 10, minZ: -8, maxZ: 8 },
+    blockers: wallSegments,
+    cellSize: 0.25,
+    radius: 0.32,
+    epsilon: 0.01,
+  });
+  const path = grid.findPath({ x: -7.2, z: -5 }, { x: -7.2, z: 0.5 });
+  assert.ok(path.length > 0);
+  assert.ok(path.some((point) => point.z > -0.875));
 });

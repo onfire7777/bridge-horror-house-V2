@@ -151,7 +151,7 @@ export function selectReachableSpawn(grid, playerPosition, candidates, {
     const path = grid.findPath(candidate, playerPosition);
     const distance = routeDistance(path, candidate, playerPosition);
     if (Number.isFinite(distance) && distance >= minRouteDistance) {
-      eligible.push({ position: { x: candidate.x, z: candidate.z }, routeDistance: distance });
+      eligible.push({ position: { ...path[0] }, routeDistance: distance });
     }
   }
   if (eligible.length === 0) return null;
