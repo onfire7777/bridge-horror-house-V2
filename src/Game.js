@@ -11,6 +11,7 @@ import { Ghost } from './systems/Ghost.js';
 import { NavigationGrid, selectReachableSpawn } from './systems/Navigation.js';
 import { BATTERY_RULES, batteryBand } from './systems/RunRules.js';
 import { loadAudioSettings, normalizeAudioSettings, saveAudioSettings } from './systems/AudioSettings.js';
+import { CaptureSequence } from './systems/CaptureSequence.js';
 import { ScareDirector } from './systems/ScareDirector.js';
 import { HUD } from './ui/HUD.js';
 
@@ -76,6 +77,12 @@ export class Game {
 
     this._bindEvents();
     this._bindAudioSettings();
+    this.captureSequence = new CaptureSequence({
+      duration: 1850,
+      onStart: () => this._startCapture(),
+      onFinish: () => this._finishCapture(),
+      onCancel: () => this.hud.hideJumpscare(),
+    });
 
     this.clock = new THREE.Clock();
     this.renderer.setAnimationLoop(() => this._tick());
@@ -186,23 +193,30 @@ export class Game {
 
   _onCaught() {
     if (this.state !== 'playing') return;
+    this.captureSequence.start();
+  }
+
+  _startCapture() {
     this.state = 'caught';
     this.player.enabled = false;
     document.exitPointerLock();
-    this.audio.stinger(1.2);
-    this.audio.playRandomCatchphrase();
     this.audio.stopHeartbeat();
     this.audio.stopChaseMusic();
     this.audio.setBreathLevel(0);
     this.audio.setSizzle(0);
     this.hud.jumpscare(mattBillboardURL);
     this.hud.shake();
-    setTimeout(() => {
+    const stopAudio = this.audio.startJumpscare();
+    return () => {
+      stopAudio();
       this.hud.hideJumpscare();
-      this.hud.hide();
-      this.hud.setDanger(false);
-      document.getElementById('death-screen').classList.remove('hidden');
-    }, 1500);
+    };
+  }
+
+  _finishCapture() {
+    this.hud.hide();
+    this.hud.setDanger(false);
+    document.getElementById('death-screen').classList.remove('hidden');
   }
 
   _onEscaped() {

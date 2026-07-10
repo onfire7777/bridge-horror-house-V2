@@ -55,6 +55,7 @@ export class AudioEngine {
     this.chaseWanted = false;
     this.voiceBuffers = [];
     this.lastVoiceIndex = -1;
+    this.jumpscareSources = [];
 
     this.chaseGain = this.ctx.createGain();
     this.chaseGain.gain.value = 0.0001;
@@ -428,6 +429,76 @@ export class AudioEngine {
     source.connect(gain);
     gain.connect(this.buses.voice);
     source.start();
+  }
+
+  startJumpscare() {
+    this.stopJumpscare();
+    const t = this.now;
+    for (const category of ['ambience', 'music', 'effects', 'voice']) {
+      const gain = this.buses[category].gain;
+      gain.cancelScheduledValues(t);
+      gain.setValueAtTime(gain.value, t);
+      gain.linearRampToValueAtTime(this.settings[category] * 0.12, t + 0.055);
+    }
+
+    const mix = this.ctx.createGain();
+    mix.gain.setValueAtTime(0.0001, t);
+    mix.gain.exponentialRampToValueAtTime(0.92, t + 0.018);
+    mix.gain.exponentialRampToValueAtTime(0.22, t + 1.55);
+    const distortion = this.ctx.createWaveShaper();
+    distortion.curve = this._distortionCurve(115);
+    distortion.oversample = '4x';
+    mix.connect(distortion);
+    this._out(distortion, 0.16, 'jumpscare');
+
+    const noise = this._noiseSource();
+    const noiseFilter = this.ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(1700, t);
+    noiseFilter.frequency.exponentialRampToValueAtTime(430, t + 1.4);
+    noiseFilter.Q.value = 0.75;
+    noise.connect(noiseFilter);
+    noiseFilter.connect(mix);
+    noise.start(t);
+    noise.stop(t + 1.65);
+    this.jumpscareSources.push(noise);
+
+    for (const [frequency, type] of [[54, 'sawtooth'], [710, 'square'], [1220, 'sawtooth']]) {
+      const oscillator = this.ctx.createOscillator();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, t);
+      oscillator.frequency.exponentialRampToValueAtTime(Math.max(28, frequency * 0.58), t + 1.5);
+      const gain = this.ctx.createGain();
+      gain.gain.value = frequency < 100 ? 0.65 : 0.16;
+      oscillator.connect(gain);
+      gain.connect(mix);
+      oscillator.start(t);
+      oscillator.stop(t + 1.65);
+      this.jumpscareSources.push(oscillator);
+    }
+
+    if (this.voiceBuffers.length > 0) {
+      const source = this.ctx.createBufferSource();
+      const index = (this.lastVoiceIndex + 1 + Math.floor(Math.random() * this.voiceBuffers.length)) % this.voiceBuffers.length;
+      this.lastVoiceIndex = index;
+      source.buffer = this.voiceBuffers[index];
+      const gain = this.ctx.createGain();
+      gain.gain.value = 1.35;
+      source.connect(gain);
+      gain.connect(mix);
+      source.start(t);
+      this.jumpscareSources.push(source);
+    }
+
+    return () => this.stopJumpscare();
+  }
+
+  stopJumpscare() {
+    for (const source of this.jumpscareSources) {
+      try { source.stop(); } catch { /* source already ended */ }
+    }
+    this.jumpscareSources = [];
+    if (this.buses) this.applySettings(this.settings);
   }
 
   /* ================= one-shots ================= */
