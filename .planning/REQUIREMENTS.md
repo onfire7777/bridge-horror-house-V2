@@ -54,10 +54,10 @@
 
 ### Verification and Delivery
 
-- [ ] **QUAL-01**: Pure Node tests cover navigation, collision substeps, routes, settings normalization/persistence, balance fixtures, spawn validity, and all key candidates/combinations.
-- [ ] **QUAL-02**: The production Vite build and preview pass browser checks for settings, persistence, pointer-lock isolation, wall/door pursuit, capture, mute behavior, reduced motion, and unexpected console errors.
+- [x] **QUAL-01**: Pure Node tests cover navigation, collision substeps, routes, settings normalization/persistence, balance fixtures, spawn validity, and all key candidates/combinations.
+- [x] **QUAL-02**: The production Vite build and preview pass browser checks for settings, persistence, pointer-lock isolation, wall/door pursuit, capture, mute behavior, reduced motion, and unexpected console errors.
 - [ ] **QUAL-03**: Manual playtests verify legal pursuit pressure, novice/practiced beatability, battery decisions, key discoverability, perceived jumpscare force, voice intelligibility, room readability, and full-run cleanup.
-- [ ] **GIT-01**: Each substantial increment is independently verified, committed, pushed to `main`, fetched, and confirmed zero commits ahead/behind `origin/main`.
+- [x] **GIT-01**: Each substantial increment is independently verified, committed, pushed to `main`, fetched, and confirmed zero commits ahead/behind `origin/main`.
 
 ## Acceptance Criteria
 
@@ -115,10 +115,10 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 | SCARE-03 | Phase 5 | Complete |
 | ENV-01 | Phase 6 | Complete |
 | ENV-02 | Phase 6 | Complete |
-| QUAL-01 | Phase 7 | Pending |
-| QUAL-02 | Phase 7 | Pending |
+| QUAL-01 | Phase 7 | Complete |
+| QUAL-02 | Phase 7 | Complete |
 | QUAL-03 | Phase 7 | Pending |
-| GIT-01 | Phase 7 | Pending |
+| GIT-01 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total

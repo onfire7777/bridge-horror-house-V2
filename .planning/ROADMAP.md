@@ -108,7 +108,7 @@ This milestone hardens the existing browser game in dependency order: establish 
   2. In the production Vite preview, the player can adjust and reload settings, enter and leave pointer lock, survive legal wall/door pursuit, trigger capture, mute sound, use reduced motion, and retry without unexpected console errors or leaked state.
   3. Novice and practiced players can complete full runs with sustained legal pressure, meaningful battery decisions, findable keys, intelligible voice, forceful capture, readable rooms, and a beatable escape path on representative hardware.
   4. The user can inspect independent verification and pushed GitHub history for every substantial increment, then confirm local `main` is zero commits ahead or behind `origin/main`.
-**Plans**: TBD
+**Plans**: 0/1 — user playtest pending
 
 ## Progress
 
@@ -123,4 +123,4 @@ Phases execute sequentially in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7. A
 | 4. Audio Buses Persistence and Settings UI | 1/1 | Complete | 2026-07-10 |
 | 5. Capture and Sound-Safety Orchestration | 1/1 | Complete | 2026-07-10 |
 | 6. BridgeMind Environment and Detailed Sound | 1/1 | Complete | 2026-07-10 |
-| 7. Production Verification and Tuning | 0/TBD | Not started | - |
+| 7. Production Verification and Tuning | 0/1 | Awaiting user playtest | - |
