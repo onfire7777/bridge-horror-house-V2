@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ZONES, BOUNDS } from '../world/House.js';
+import { ZONES } from '../world/House.js';
 
 function inZone(pos, z) {
   return pos.x >= z.minX && pos.x <= z.maxX && pos.z >= z.minZ && pos.z <= z.maxZ;
@@ -110,11 +110,12 @@ export class ScareDirector {
     this.stalkTimer -= dt;
     if (this.stalkTimer > 0) return;
     this.stalkTimer = 24 + Math.random() * 20;
-    // he manifests ~8m away and drifts toward you
-    const a = Math.random() * Math.PI * 2;
-    const x = THREE.MathUtils.clamp(playerPos.x + Math.cos(a) * 8, BOUNDS.minX + 1, BOUNDS.maxX - 1);
-    const z = THREE.MathUtils.clamp(playerPos.z + Math.sin(a) * 8, BOUNDS.minZ + 1, BOUNDS.maxZ - 1);
-    ghost.startStalk(new THREE.Vector3(x, 0, z), 18);
+    const spawn = this.game.selectGhostSpawn(playerPos, 7);
+    if (!spawn) {
+      this.stalkTimer = 2;
+      return;
+    }
+    ghost.startStalk(spawn, 18);
     audio.growl();
     audio.staticBurst(0.25);
     hud.toast('He is here. Burn him with the light.', 2800);

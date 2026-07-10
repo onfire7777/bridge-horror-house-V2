@@ -69,6 +69,135 @@ function pointStrictlyInsideExpanded(point, aabb, clearance) {
     && point.z > aabb.minZ - clearance && point.z < aabb.maxZ + clearance;
 }
 
+function segmentIntersectsAabb(start, end, aabb) {
+  let minimum = 0;
+  let maximum = 1;
+  const delta = { x: end.x - start.x, z: end.z - start.z };
+
+  for (const axis of ['x', 'z']) {
+    const low = axis === 'x' ? aabb.minX : aabb.minZ;
+    const high = axis === 'x' ? aabb.maxX : aabb.maxZ;
+    if (delta[axis] === 0) {
+      if (start[axis] < low || start[axis] > high) return false;
+      continue;
+    }
+    const first = (low - start[axis]) / delta[axis];
+    const second = (high - start[axis]) / delta[axis];
+    const entry = Math.min(first, second);
+    const exit = Math.max(first, second);
+    minimum = Math.max(minimum, entry);
+    maximum = Math.min(maximum, exit);
+    if (minimum > maximum) return false;
+  }
+  return true;
+}
+
+export function isSegmentClear(start, end, blockers = [], { clearance = 0 } = {}) {
+  validatePoint(start, 'start');
+  validatePoint(end, 'end');
+  if (!Array.isArray(blockers)) throw new TypeError('blockers must be an array');
+  requireNonNegative(clearance, 'clearance');
+  return !blockers.some((blocker, index) => {
+    validateAabb(blocker, `blockers[${index}]`);
+    return segmentIntersectsAabb(start, end, inflateAabb(blocker, clearance, 0));
+  });
+}
+
+export function canCapture(ghostPosition, playerPosition, blockers = [], {
+  catchDistance = 0.75,
+  clearance = 0.02,
+} = {}) {
+  validatePoint(ghostPosition, 'ghostPosition');
+  validatePoint(playerPosition, 'playerPosition');
+  requirePositive(catchDistance, 'catchDistance');
+  return Math.hypot(
+    playerPosition.x - ghostPosition.x,
+    playerPosition.z - ghostPosition.z,
+  ) < catchDistance && isSegmentClear(ghostPosition, playerPosition, blockers, { clearance });
+}
+
+export function doorBlocksAtAngle(angle, openAngle, clearanceAngle = 0.05) {
+  requireNonNegative(angle, 'angle');
+  requirePositive(openAngle, 'openAngle');
+  requireNonNegative(clearanceAngle, 'clearanceAngle');
+  if (clearanceAngle >= openAngle) throw new RangeError('clearanceAngle must be smaller than openAngle');
+  return angle + Number.EPSILON < openAngle - clearanceAngle;
+}
+
+function routeDistance(path, start, end) {
+  if (path.length === 0) return Infinity;
+  let distance = Math.hypot(path[0].x - start.x, path[0].z - start.z);
+  for (let index = 1; index < path.length; index++) {
+    distance += Math.hypot(path[index].x - path[index - 1].x, path[index].z - path[index - 1].z);
+  }
+  const last = path[path.length - 1];
+  return distance + Math.hypot(end.x - last.x, end.z - last.z);
+}
+
+export function selectReachableSpawn(grid, playerPosition, candidates, {
+  minRouteDistance = 6,
+  random = Math.random,
+} = {}) {
+  if (!grid || typeof grid.findPath !== 'function') throw new TypeError('grid must support findPath');
+  validatePoint(playerPosition, 'playerPosition');
+  if (!Array.isArray(candidates)) throw new TypeError('candidates must be an array');
+  requireNonNegative(minRouteDistance, 'minRouteDistance');
+  if (typeof random !== 'function') throw new TypeError('random must be a function');
+
+  const eligible = [];
+  for (let index = 0; index < candidates.length; index++) {
+    const candidate = candidates[index];
+    validatePoint(candidate, `candidates[${index}]`);
+    const path = grid.findPath(candidate, playerPosition);
+    const distance = routeDistance(path, candidate, playerPosition);
+    if (Number.isFinite(distance) && distance >= minRouteDistance) {
+      eligible.push({ position: { x: candidate.x, z: candidate.z }, routeDistance: distance });
+    }
+  }
+  if (eligible.length === 0) return null;
+  const sample = random();
+  if (!Number.isFinite(sample) || sample < 0 || sample >= 1) {
+    throw new RangeError('random must return a finite value in [0, 1)');
+  }
+  return eligible[Math.floor(sample * eligible.length)];
+}
+
+export class CachedRoute {
+  constructor(grid, { replanInterval = 0.45, arrivalRadius = 0.22 } = {}) {
+    if (!grid || typeof grid.findPath !== 'function') throw new TypeError('grid must support findPath');
+    this.grid = grid;
+    this.replanInterval = requirePositive(replanInterval, 'replanInterval');
+    this.arrivalRadius = requireNonNegative(arrivalRadius, 'arrivalRadius');
+    this.reset();
+  }
+
+  reset() {
+    this.path = [];
+    this.index = 0;
+    this.replanTimer = 0;
+  }
+
+  next(position, goal, dt) {
+    validatePoint(position, 'position');
+    validatePoint(goal, 'goal');
+    requireNonNegative(dt, 'dt');
+    this.replanTimer -= dt;
+    if (this.replanTimer <= 0 || this.index >= this.path.length) {
+      this.path = this.grid.findPath(position, goal);
+      if (this.path.length > 0) this.path[this.path.length - 1] = { x: goal.x, z: goal.z };
+      this.index = this.path.length > 1 ? 1 : 0;
+      this.replanTimer = this.replanInterval;
+    }
+
+    while (this.index < this.path.length) {
+      const target = this.path[this.index];
+      if (Math.hypot(target.x - position.x, target.z - position.z) > this.arrivalRadius) return target;
+      this.index++;
+    }
+    return null;
+  }
+}
+
 export class NavigationGrid {
   constructor({
     bounds,

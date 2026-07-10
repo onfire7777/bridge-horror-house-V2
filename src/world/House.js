@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as TX from './Textures.js';
+import { doorBlocksAtAngle } from '../systems/Navigation.js';
 
 export const WALL_H = 3;
 export const BOUNDS = { minX: -10, maxX: 10, minZ: -8, maxZ: 8 };
@@ -59,7 +60,7 @@ class Door {
   }
 
   get isClosed() { return this.angle < 0.12; }
-  get isOpen() { return this.angle > this.openAngle - 0.2; }
+  get isOpen() { return !doorBlocksAtAngle(this.angle, this.openAngle); }
 
   setOpen(open, speed = 2.2) {
     this.target = open ? this.openAngle : 0;
@@ -77,7 +78,7 @@ class Door {
   }
 
   aabb() {
-    if (!this.isClosed) return null;
+    if (!doorBlocksAtAngle(this.angle, this.openAngle)) return null;
     return {
       minX: this.hingeX, maxX: this.hingeX + this.width,
       minZ: this.wallZ - 0.1, maxZ: this.wallZ + 0.1,
@@ -557,6 +558,25 @@ export class House {
       if (box) out.push(box);
     }
     return out;
+  }
+
+  requestDoorForGhost(position, routeTarget, maxDistance = 1.25) {
+    let nearest = null;
+    let nearestDistance = Infinity;
+    for (const door of this.doors) {
+      if (door === this.props.frontDoor) continue;
+      const center = { x: door.hingeX + door.width / 2, z: door.wallZ };
+      const fromGhost = Math.hypot(position.x - center.x, position.z - center.z);
+      const fromRoute = Math.hypot(routeTarget.x - center.x, routeTarget.z - center.z);
+      if (fromGhost <= maxDistance && fromRoute <= maxDistance * 1.35 && fromGhost < nearestDistance) {
+        nearest = door;
+        nearestDistance = fromGhost;
+      }
+    }
+    if (!nearest) return null;
+    const started = nearest.target < nearest.openAngle - 0.05;
+    nearest.setOpen(true, 3.8);
+    return { started, ready: nearest.isOpen };
   }
 
   flickerAll(duration) { this.flickerTime = Math.max(this.flickerTime, duration); }

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import mattBillboardURL from '../assets/matt-billboard.png?url';
-import { BOUNDS } from '../world/House.js';
-import { moveCircleAgainstAabbs } from './Navigation.js';
+import { CachedRoute, canCapture, moveCircleAgainstAabbs } from './Navigation.js';
 
 const CHASE_SPEED = 3.3;
 const STALK_SPEED = 1.25;
@@ -14,7 +13,7 @@ const COLLISION_EPSILON = 0.01;
 const MAX_MOTION_SUBSTEP = 0.1;
 
 export class Ghost {
-  constructor(scene) {
+  constructor(scene, navigationGrid = null) {
     this.scene = scene;
     this.mode = 'hidden';   // hidden | apparition | stalk | chase | banished
     this.apparitionTimer = 0;
@@ -25,6 +24,7 @@ export class Ghost {
     this.burnMeter = 0;
     this.burning = false;
     this.banishCount = 0;
+    this.route = navigationGrid ? new CachedRoute(navigationGrid) : null;
 
     this._build();
     this.group.visible = false;
@@ -58,12 +58,14 @@ export class Ghost {
     this.mode = 'apparition';
     this.apparitionTimer = duration;
     this.group.visible = true;
+    this.route?.reset();
   }
 
   vanish() {
     this.mode = 'hidden';
     this.group.visible = false;
     this.burnMeter = 0;
+    this.route?.reset();
   }
 
   /** Pre-finale hunting phase: he manifests and drifts toward the player. */
@@ -73,6 +75,7 @@ export class Ghost {
     this.stalkTimer = lifespan;
     this.burnMeter = 0;
     this.group.visible = true;
+    this.route?.reset();
   }
 
   startChase(spawnPos) {
@@ -80,6 +83,7 @@ export class Ghost {
     this.mode = 'chase';
     this.burnMeter = 0;
     this.group.visible = true;
+    this.route?.reset();
   }
 
   get engaged() { return this.mode === 'stalk' || this.mode === 'chase'; }
@@ -115,23 +119,22 @@ export class Ghost {
   /* ---------------- update ---------------- */
 
   /** @returns true the moment the player is caught */
-  update(dt, playerPos, t, staticColliders = []) {
+  update(dt, playerPos, t, {
+    getColliders = () => [],
+    requestDoor = () => null,
+    selectSpawn = () => null,
+  } = {}) {
     if (this.mode === 'banished') {
       this.banishTimer -= dt;
       if (this.banishTimer <= 0) {
-        // he reforms out of reach and resumes the hunt
-        const a = Math.random() * Math.PI * 2;
-        const x = THREE.MathUtils.clamp(playerPos.x + Math.cos(a) * 10, BOUNDS.minX + 1, BOUNDS.maxX - 1);
-        const z = THREE.MathUtils.clamp(playerPos.z + Math.sin(a) * 10, BOUNDS.minZ + 1, BOUNDS.maxZ - 1);
-        this.startChase(new THREE.Vector3(x, 0, z));
+        const spawn = selectSpawn(playerPos, 8);
+        if (spawn) this.startChase(spawn);
+        else this.banishTimer = 0.5;
       }
       return false;
     }
     if (this.mode === 'hidden') return false;
 
-    const dx = playerPos.x - this.group.position.x;
-    const dz = playerPos.z - this.group.position.z;
-    const dist = Math.hypot(dx, dz);
     let motionX = 0;
     let motionZ = 0;
 
@@ -145,8 +148,6 @@ export class Ghost {
     this.group.scale.set(breathe, breathe, breathe);
 
     if (this.burning) {
-      motionX += (Math.random() - 0.5) * 0.05;
-      motionZ += (Math.random() - 0.5) * 0.05;
       this.spriteMat.color.setHex(Math.random() > 0.35 ? 0xffffff : 0xff6b35);
       this.spriteMat.opacity = 0.55 + Math.random() * 0.45;
     } else {
@@ -162,7 +163,13 @@ export class Ghost {
       return false;
     }
 
-    // ----- movement: blocker-safe, lurching, never smooth -----
+    // ----- movement: cached legal route, blocker-safe, never smooth -----
+    const routeTarget = this.route?.next(this.group.position, playerPos, dt) ?? null;
+    if (routeTarget) requestDoor(this.group.position, routeTarget);
+    const colliders = getColliders();
+    const dx = routeTarget ? routeTarget.x - this.group.position.x : 0;
+    const dz = routeTarget ? routeTarget.z - this.group.position.z : 0;
+    const dist = Math.hypot(dx, dz);
     const slow = this.burning ? 0.3 : 1;
     const base = this.mode === 'chase' ? CHASE_SPEED : STALK_SPEED;
     const lurch = 1 + Math.sin(this.bobClock * 8.5) * 0.55;   // surging gait
@@ -177,12 +184,16 @@ export class Ghost {
         motionX += px * sway;
         motionZ += pz * sway;
       }
+      if (this.burning) {
+        motionX += (Math.random() - 0.5) * 0.05;
+        motionZ += (Math.random() - 0.5) * 0.05;
+      }
     }
 
     const next = moveCircleAgainstAabbs(
       this.group.position,
       { x: motionX, z: motionZ },
-      staticColliders,
+      colliders,
       { radius: GHOST_RADIUS, epsilon: COLLISION_EPSILON, maxSubstep: MAX_MOTION_SUBSTEP },
     );
     this.group.position.x = next.x;
@@ -202,7 +213,8 @@ export class Ghost {
       }
     }
 
-    return dist < CATCH_DIST;
+    return this.route?.path.length > 0
+      && canCapture(this.group.position, playerPos, colliders, { catchDistance: CATCH_DIST });
   }
 
   distanceTo(playerPos) {

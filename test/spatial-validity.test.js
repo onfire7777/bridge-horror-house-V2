@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   CachedRoute,
   NavigationGrid,
+  canCapture,
   doorBlocksAtAngle,
   isSegmentClear,
   selectReachableSpawn,
@@ -15,6 +16,14 @@ test('segment clearance treats walls and closed-door slabs as occluders', () => 
   assert.equal(isSegmentClear({ x: 2, z: 4 }, { x: 6, z: 4 }, [slab]), false);
   assert.equal(isSegmentClear({ x: 2, z: 1 }, { x: 6, z: 1 }, [slab]), true);
   assert.equal(isSegmentClear({ x: 2, z: 2 }, { x: 6, z: 2 }, [slab]), false);
+});
+
+test('capture uses the supplied post-motion position and rejects occluded proximity', () => {
+  const wall = { minX: 0.2, maxX: 0.3, minZ: -1, maxZ: 1 };
+  const player = { x: 0.6, z: 0 };
+  assert.equal(canCapture({ x: 0, z: 0 }, player, [], { catchDistance: 0.75 }), true);
+  assert.equal(canCapture({ x: -0.2, z: 0 }, player, [], { catchDistance: 0.75 }), false);
+  assert.equal(canCapture({ x: 0, z: 0 }, player, [wall], { catchDistance: 0.75 }), false);
 });
 
 test('a door blocks until its swing has reached body-clearance angle', () => {

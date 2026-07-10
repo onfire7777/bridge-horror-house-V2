@@ -3,17 +3,28 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { House } from './world/House.js';
+import { BOUNDS, House } from './world/House.js';
 import mattBillboardURL from './assets/matt-billboard.png?url';
 import { Player } from './player/Player.js';
 import { AudioEngine } from './systems/AudioEngine.js';
 import { Ghost } from './systems/Ghost.js';
+import { NavigationGrid, selectReachableSpawn } from './systems/Navigation.js';
 import { ScareDirector } from './systems/ScareDirector.js';
 import { HUD } from './ui/HUD.js';
 
 const TOTAL_KEYS = 3;
 const BURN_RANGE = 10;       // how far the beam reaches him
 const BATTERY_REFILL = 45;
+const GHOST_SPAWN_CANDIDATES = Object.freeze([
+  Object.freeze({ x: -8, z: 6 }),
+  Object.freeze({ x: -1, z: 5 }),
+  Object.freeze({ x: 8, z: 6 }),
+  Object.freeze({ x: -8, z: 0.5 }),
+  Object.freeze({ x: 8, z: 0.5 }),
+  Object.freeze({ x: -7, z: -6 }),
+  Object.freeze({ x: 0, z: -6 }),
+  Object.freeze({ x: 7, z: -6 }),
+]);
 
 export class Game {
   constructor(canvas) {
@@ -31,9 +42,16 @@ export class Game {
     this.hud = new HUD();
     this.audio = new AudioEngine();
     this.house = new House(this.scene);
+    this.navigation = new NavigationGrid({
+      bounds: BOUNDS,
+      blockers: this.house.staticColliders,
+      cellSize: 0.4,
+      radius: 0.32,
+      epsilon: 0.01,
+    });
     this.player = new Player(this.camera, this.canvas, this.audio);
     this.player.addTo(this.scene);
-    this.ghost = new Ghost(this.scene);
+    this.ghost = new Ghost(this.scene, this.navigation);
     this.director = new ScareDirector(this);
 
     this._setupComposer();
@@ -241,11 +259,20 @@ export class Game {
       this.audio.startHeartbeat(96);
       this.audio.startChaseMusic();
       this.chaseActive = true;
-      // he rises in the hallway, between you and the door if you're north
       const p = this.player.position;
-      const spawn = p.z < 0.5 ? new THREE.Vector3(0, 0, 1.0) : new THREE.Vector3(0, 0, -6.5);
-      this.ghost.startChase(spawn);
+      const spawn = this.selectGhostSpawn(p, 8);
+      if (spawn) this.ghost.startChase(spawn);
     }, 2600);
+  }
+
+  selectGhostSpawn(playerPosition, minimumRouteDistance = 7) {
+    const selected = selectReachableSpawn(
+      this.navigation,
+      playerPosition,
+      GHOST_SPAWN_CANDIDATES,
+      { minRouteDistance: minimumRouteDistance },
+    );
+    return selected ? new THREE.Vector3(selected.position.x, 0, selected.position.z) : null;
   }
 
   _lookTarget() {
@@ -310,7 +337,15 @@ export class Game {
       this.player.update(dt, this.house.getColliders());
       this.director.update(dt, this.player.position);
 
-      const caught = this.ghost.update(dt, this.player.position, t, this.house.staticColliders);
+      const caught = this.ghost.update(dt, this.player.position, t, {
+        getColliders: () => this.house.getColliders(),
+        requestDoor: (position, routeTarget) => {
+          const result = this.house.requestDoorForGhost(position, routeTarget);
+          if (result?.started) this.audio.doorCreak();
+          return result;
+        },
+        selectSpawn: (position, minimumDistance) => this.selectGhostSpawn(position, minimumDistance),
+      });
       if (caught) {
         this._onCaught();
         this.composer.render();
