@@ -36,9 +36,9 @@
 
 ### Sound Settings and Mix
 
-- [ ] **AUD-01**: The game exposes master, ambience, music, effects, voice, and jumpscare-intensity controls plus a master mute action from both the title and in-game/pause state.
-- [ ] **AUD-02**: Sound controls are labeled, keyboard-operable, applied immediately with smooth gain ramps, safely normalized, and persisted in a versioned `localStorage` record that tolerates missing, corrupt, or unavailable storage.
-- [ ] **AUD-03**: Every dry and reverberated source routes through exactly one semantic category before master compression; setting master or a category to zero produces a true mute with no bypass path.
+- [x] **AUD-01**: The game exposes master, ambience, music, effects, voice, and jumpscare-intensity controls plus a master mute action from both the title and in-game/pause state.
+- [x] **AUD-02**: Sound controls are labeled, keyboard-operable, applied immediately with smooth gain ramps, safely normalized, and persisted in a versioned `localStorage` record that tolerates missing, corrupt, or unavailable storage.
+- [x] **AUD-03**: Every dry and reverberated source routes through exactly one semantic category before master compression; setting master or a category to zero produces a true mute with no bypass path.
 - [ ] **AUD-04**: Doors, pickups, key collection, battery thresholds, flashlight failure, stalking, pursuit, burn, banishment, capture, room ambience, and escape use distinct sound cues with visual redundancy for critical state.
 
 ### Jumpscare
@@ -106,9 +106,9 @@ Each v1 requirement has one owning roadmap phase. `GIT-01` is cross-cutting deli
 | BATT-02 | Phase 3 | Complete |
 | KEY-01 | Phase 3 | Complete |
 | KEY-02 | Phase 3 | Complete |
-| AUD-01 | Phase 4 | Pending |
-| AUD-02 | Phase 4 | Pending |
-| AUD-03 | Phase 4 | Pending |
+| AUD-01 | Phase 4 | Complete |
+| AUD-02 | Phase 4 | Complete |
+| AUD-03 | Phase 4 | Complete |
 | AUD-04 | Phase 6 | Pending |
 | SCARE-01 | Phase 5 | Pending |
 | SCARE-02 | Phase 5 | Pending |
