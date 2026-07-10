@@ -1,13 +1,9 @@
 import * as THREE from 'three';
 import mattBillboardURL from '../assets/matt-billboard.png?url';
 import { CachedRoute, canCapture, moveCircleAgainstAabbs } from './Navigation.js';
+import { huntTuning } from './RunRules.js';
 
-const CHASE_SPEED = 3.3;
-const STALK_SPEED = 1.25;
 const CATCH_DIST = 0.75;
-const BURN_TIME_STALK = 1.6;   // seconds of beam to banish a stalker
-const BURN_TIME_CHASE = 2.4;   // he is stronger once fully awake
-const BANISH_DOWNTIME = 8;     // chase: seconds before he reforms
 const GHOST_RADIUS = 0.32;
 const COLLISION_EPSILON = 0.01;
 const MAX_MOTION_SUBSTEP = 0.1;
@@ -24,6 +20,7 @@ export class Ghost {
     this.burnMeter = 0;
     this.burning = false;
     this.banishCount = 0;
+    this.huntTier = 0;
     this.route = navigationGrid ? new CachedRoute(navigationGrid) : null;
 
     this._build();
@@ -92,7 +89,7 @@ export class Ghost {
   applyBurn(dt) {
     if (!this.engaged) return null;
     this.burning = true;
-    const burnTime = this.mode === 'chase' ? BURN_TIME_CHASE : BURN_TIME_STALK;
+    const burnTime = huntTuning(this.mode === 'chase' ? 3 : this.huntTier, this.banishCount).burnTime;
     this.burnMeter += dt / burnTime;
     if (this.burnMeter >= 1) {
       this._banish();
@@ -109,7 +106,7 @@ export class Ghost {
     this.burning = false;
     if (this.mode === 'chase') {
       this.mode = 'banished';
-      this.banishTimer = BANISH_DOWNTIME;
+      this.banishTimer = huntTuning(3, this.banishCount).reformDelay;
       this.group.visible = false;
     } else {
       this.vanish();
@@ -123,7 +120,9 @@ export class Ghost {
     getColliders = () => [],
     requestDoor = () => null,
     selectSpawn = () => null,
+    huntTier = 0,
   } = {}) {
+    this.huntTier = huntTier;
     if (this.mode === 'banished') {
       this.banishTimer -= dt;
       if (this.banishTimer <= 0) {
@@ -171,7 +170,8 @@ export class Ghost {
     const dz = routeTarget ? routeTarget.z - this.group.position.z : 0;
     const dist = Math.hypot(dx, dz);
     const slow = this.burning ? 0.3 : 1;
-    const base = this.mode === 'chase' ? CHASE_SPEED : STALK_SPEED;
+    const tuning = huntTuning(this.mode === 'chase' ? 3 : this.huntTier, this.banishCount);
+    const base = this.mode === 'chase' ? tuning.chaseSpeed : tuning.stalkSpeed;
     const lurch = 1 + Math.sin(this.bobClock * 8.5) * 0.55;   // surging gait
     if (dist > 0.001) {
       const step = Math.min(base * slow * lurch * dt, dist);

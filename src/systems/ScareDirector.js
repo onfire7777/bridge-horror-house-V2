@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ZONES } from '../world/House.js';
+import { huntTuning } from './RunRules.js';
 
 function inZone(pos, z) {
   return pos.x >= z.minX && pos.x <= z.maxX && pos.z >= z.minZ && pos.z <= z.maxZ;
@@ -15,7 +16,7 @@ export class ScareDirector {
     this.fired = new Set();
     this.ambientTimer = 9 + Math.random() * 8; // first ambient event comes early
     this.lightningTimer = 14 + Math.random() * 14;
-    this.stalkTimer = 10 + Math.random() * 8; // grace period after the 2nd key
+    this.stalkTimer = 6;
     this.chairAnim = null;
 
     this.triggers = [
@@ -80,6 +81,11 @@ export class ScareDirector {
     player.flashlightFlicker(1.3);
   }
 
+  onKeyCollected(keysFound) {
+    if (keysFound === 1) this.stalkTimer = Math.min(this.stalkTimer, 4);
+    else if (keysFound === 2) this.stalkTimer = Math.min(this.stalkTimer, 2);
+  }
+
   /* ---------------- ambient dread ---------------- */
 
   _ambientEvent() {
@@ -102,20 +108,21 @@ export class ScareDirector {
     audio.thunder(close ? 0.45 : 1.1 + Math.random() * 1.2, close);
   }
 
-  /* ---------------- stalking phase (after 2nd key) ---------------- */
+  /* ---------------- routed stalking phase (after the 1st key) ---------------- */
 
   _maybeStartStalk(dt, playerPos) {
     const { ghost, audio, hud } = this.game;
-    if (this.game.keysFound < 2 || this.game.chaseActive || ghost.mode !== 'hidden') return;
+    const tuning = huntTuning(this.game.keysFound, ghost.banishCount);
+    if (!tuning.stalkEnabled || this.game.chaseActive || ghost.mode !== 'hidden') return;
     this.stalkTimer -= dt;
     if (this.stalkTimer > 0) return;
-    this.stalkTimer = 24 + Math.random() * 20;
+    this.stalkTimer = tuning.stalkDelayMin + Math.random() * tuning.stalkDelayRange;
     const spawn = this.game.selectGhostSpawn(playerPos, 7);
     if (!spawn) {
       this.stalkTimer = 2;
       return;
     }
-    ghost.startStalk(spawn, 18);
+    ghost.startStalk(spawn, tuning.stalkLifespan);
     audio.growl();
     audio.staticBurst(0.25);
     hud.toast('He is here. Burn him with the light.', 2800);

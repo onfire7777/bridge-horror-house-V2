@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  BATTERY_RULES,
   KEY_CANDIDATES,
   batteryBand,
   drainBattery,
@@ -38,6 +39,14 @@ test('battery bands distinguish low, critical, and empty states', () => {
   assert.equal(batteryBand(29.9), 'low');
   assert.equal(batteryBand(11.9), 'critical');
   assert.equal(batteryBand(0), 'empty');
+});
+
+test('authored supply supports a disciplined three-banish run', () => {
+  const available = BATTERY_RULES.maximum
+    + BATTERY_RULES.authoredPickups * BATTERY_RULES.refillAmount;
+  const expectedUse = 120 * BATTERY_RULES.baseDrainPerSecond
+    + 3 * huntTuning(3, 0).burnTime * BATTERY_RULES.burnDrainPerSecond;
+  assert.ok(available > expectedUse);
 });
 
 test('seeded key selection is reproducible and never repeats a slot index', () => {

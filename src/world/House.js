@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as TX from './Textures.js';
 import { doorBlocksAtAngle } from '../systems/Navigation.js';
+import { KEY_CANDIDATES, selectKeyPlacements } from '../systems/RunRules.js';
 
 export const WALL_H = 3;
 export const BOUNDS = { minX: -10, maxX: 10, minZ: -8, maxZ: 8 };
@@ -87,7 +88,7 @@ class Door {
 }
 
 export class House {
-  constructor(scene) {
+  constructor(scene, { seed = Date.now() } = {}) {
     this.scene = scene;
     this.staticColliders = [];
     this.doors = [];
@@ -100,6 +101,7 @@ export class House {
     this.flickerTime = 0;
     this.lightningTime = 0;
     this.blackout = false;
+    this.seed = seed;
 
     this.mats = this._materials();
     this._buildShell();
@@ -435,14 +437,11 @@ export class House {
   /* ---------------- items ---------------- */
 
   _buildItems() {
-    // key locations are randomized per room — no two runs match
-    const pick = (spots) => spots[Math.floor(Math.random() * spots.length)];
-    const kitchenSpot = pick([[8.9, 1.03, -7.3], [5.6, 0.86, -3.6], [9.5, 1.03, -5.6]]);
-    const studySpot = pick([[-6.7, 0.86, -6.2], [-7.1, 1.03, -5.2], [-8.9, 0.1, -7.4]]);
-    const bedroomSpot = pick([[-3.45, 1.18, -7.25], [0.9, 0.68, -7.5], [-0.6, 0.63, -6.2]]);
-    this._key(...kitchenSpot, 'kitchen');
-    this._key(...studySpot, 'study');
-    this._key(...bedroomSpot, 'bedroom');
+    this.keyPlacements = selectKeyPlacements(KEY_CANDIDATES, this.seed);
+    for (const room of ['kitchen', 'study', 'bedroom']) {
+      const { x, y, z } = this.keyPlacements[room].position;
+      this._key(x, y, z, room);
+    }
 
     // spare batteries — ammunition for the light
     this._battery(-6.9, 0.49, 4.2);   // living coffee table
@@ -503,7 +502,8 @@ export class House {
     g.userData.baseY = y;
     g.userData.spin = Math.random() * Math.PI * 2;
     // a faint glint so keys are findable in the dark
-    const glint = new THREE.PointLight(0xaa8833, 0.55, 1.6, 2);
+    g.scale.setScalar(1.2);
+    const glint = new THREE.PointLight(0xaa8833, 0.75, 2, 2);
     g.add(glint);
     for (const child of [shaft, bow, tooth]) {
       child.userData.interact = { type: 'key', id, group: g };

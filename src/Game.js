@@ -9,12 +9,12 @@ import { Player } from './player/Player.js';
 import { AudioEngine } from './systems/AudioEngine.js';
 import { Ghost } from './systems/Ghost.js';
 import { NavigationGrid, selectReachableSpawn } from './systems/Navigation.js';
+import { BATTERY_RULES, batteryBand } from './systems/RunRules.js';
 import { ScareDirector } from './systems/ScareDirector.js';
 import { HUD } from './ui/HUD.js';
 
 const TOTAL_KEYS = 3;
 const BURN_RANGE = 10;       // how far the beam reaches him
-const BATTERY_REFILL = 45;
 const GHOST_SPAWN_CANDIDATES = Object.freeze([
   Object.freeze({ x: -8, z: 6 }),
   Object.freeze({ x: -1, z: 5 }),
@@ -26,6 +26,17 @@ const GHOST_SPAWN_CANDIDATES = Object.freeze([
   Object.freeze({ x: 7, z: -6 }),
 ]);
 
+function createRunSeed() {
+  const provided = new URLSearchParams(window.location.search).get('seed');
+  if (provided) return provided;
+  if (globalThis.crypto?.getRandomValues) {
+    const value = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(value);
+    return `bridge-${value[0].toString(36)}`;
+  }
+  return `bridge-${Date.now().toString(36)}`;
+}
+
 export class Game {
   constructor(canvas) {
     this.canvas = canvas;
@@ -35,13 +46,15 @@ export class Game {
     this.escaping = false;
     this.startTime = 0;
     this.banishes = 0;
+    this.runSeed = createRunSeed();
+    this.lastBatteryBand = 'normal';
 
     this._setupRenderer();
     this._setupScene();
 
     this.hud = new HUD();
     this.audio = new AudioEngine();
-    this.house = new House(this.scene);
+    this.house = new House(this.scene, { seed: this.runSeed });
     this.navigation = new NavigationGrid({
       bounds: BOUNDS,
       blockers: this.house.staticColliders,
@@ -134,7 +147,7 @@ export class Game {
     this.hud.show();
     this.hud.setObjective('Recover the three BridgeMind access keys');
     this.hud.setKeys(0, TOTAL_KEYS);
-    this.hud.setBattery(this.player.battery);
+    this.hud.setBattery(this.player.battery, this.lastBatteryBand);
     this.canvas.requestPointerLock();
     // an unwelcome welcome
     setTimeout(() => this.audio.doorCreak(), 1200);
@@ -193,9 +206,13 @@ export class Game {
       case 'key': this._takeKey(info); break;
       case 'battery':
         this.house.removeBattery(info.group);
-        this.player.addBattery(BATTERY_REFILL);
+        {
+          const gained = this.player.addBattery(BATTERY_RULES.refillAmount);
+          this.lastBatteryBand = batteryBand(this.player.battery);
+          this.hud.setBattery(this.player.battery, this.lastBatteryBand);
+          this.hud.toast(`Recovered ${Math.round(gained)} tokens. Reserve capped at 100.`);
+        }
         this.audio.batteryPickup();
-        this.hud.toast('Fresh batteries. The light is your weapon.');
         break;
       case 'note':
         this.audio.click();
@@ -222,6 +239,7 @@ export class Game {
   _takeKey(info) {
     this.house.removeKey(info.group);
     this.keysFound++;
+    this.director.onKeyCollected(this.keysFound);
     this.audio.pickup();
     this.hud.setKeys(this.keysFound, TOTAL_KEYS);
     this.hud.flash('#211a08', 0.3, 120);
@@ -325,6 +343,23 @@ export class Game {
     }
   }
 
+  _updateBatteryFeedback() {
+    const band = batteryBand(this.player.battery);
+    this.hud.setBattery(this.player.battery, band);
+    if (band === this.lastBatteryBand) return;
+    this.lastBatteryBand = band;
+    if (band === 'low') {
+      this.audio.thump(0.25);
+      this.hud.toast('TOKEN RESERVE LOW — find a battery.', 2200);
+    } else if (band === 'critical') {
+      this.audio.staticBurst(0.12);
+      this.hud.toast('TOKEN RESERVE CRITICAL — the beam is failing.', 2400);
+    } else if (band === 'empty') {
+      this.audio.lockedRattle();
+      this.hud.toast('TOKENS EMPTY — flashlight offline.', 2600);
+    }
+  }
+
   /* ---------------- main loop ---------------- */
 
   _tick() {
@@ -345,6 +380,7 @@ export class Game {
           return result;
         },
         selectSpawn: (position, minimumDistance) => this.selectGhostSpawn(position, minimumDistance),
+        huntTier: this.keysFound,
       });
       if (caught) {
         this._onCaught();
@@ -353,7 +389,7 @@ export class Game {
       }
 
       this._updateBurn(dt);
-      this.hud.setBattery(this.player.battery);
+      this._updateBatteryFeedback();
 
       let ghostDistance = Infinity;
 

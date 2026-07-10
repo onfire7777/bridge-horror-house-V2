@@ -1,13 +1,12 @@
 import * as THREE from 'three';
 import { flashlightCookie } from '../world/Textures.js';
+import { drainBattery, refillBattery } from '../systems/RunRules.js';
 
 const EYE_HEIGHT = 1.62;
 const RADIUS = 0.32;
 const WALK_SPEED = 2.3;
 const SPRINT_SPEED = 4.3;
 const BEAM_INTENSITY = 26;
-const DRAIN_PER_SEC = 0.55;   // idle flashlight drain
-const BURN_DRAIN_PER_SEC = 5; // extra drain while burning him
 
 export class Player {
   constructor(camera, domElement, audio) {
@@ -84,8 +83,10 @@ export class Player {
   get beamActive() { return this.flashlightOn && this.battery > 0; }
 
   addBattery(amount) {
-    this.battery = Math.min(100, this.battery + amount);
+    const previous = this.battery;
+    this.battery = refillBattery(this.battery, amount);
     if (!this.flashlightOn) this.flashlightOn = true;
+    return this.battery - previous;
   }
 
   flashlightFlicker(duration = 0.8) { this.flickerTime = Math.max(this.flickerTime, duration); }
@@ -99,9 +100,11 @@ export class Player {
 
     // --- battery ---
     if (this.flashlightOn && this.battery > 0) {
-      this.battery -= dt * (DRAIN_PER_SEC + (this.burning ? BURN_DRAIN_PER_SEC : 0));
-      if (this.battery <= 0) {
-        this.battery = 0;
+      this.battery = drainBattery(this.battery, dt, {
+        flashlightOn: this.flashlightOn,
+        burning: this.burning,
+      });
+      if (this.battery === 0) {
         this.flashlightOn = false;
         this.audio?.click();
       }
@@ -179,8 +182,8 @@ export class Player {
     this.flashTarget.position.copy(this.camera.position).addScaledVector(this.aimDir, 8);
 
     let intensity = this.beamActive ? BEAM_INTENSITY : 0;
-    // weak cell sputters below 20%
-    if (this.beamActive && this.battery < 20 && Math.random() < 0.06) {
+    // critical cells sputter hard enough to read without obscuring movement
+    if (this.beamActive && this.battery < 12 && Math.random() < 0.1) {
       intensity *= Math.random() * 0.5;
     }
     if (this.flickerTime > 0 && this.beamActive) {

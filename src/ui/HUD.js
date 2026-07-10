@@ -16,6 +16,7 @@ export class HUD {
       scareFace: document.getElementById('scare-face'),
       batteryFill: document.getElementById('battery-fill'),
       battery: document.getElementById('battery'),
+      batteryLabel: document.querySelector('#battery > span'),
       burn: document.getElementById('burn'),
       burnFill: document.getElementById('burn-fill'),
     };
@@ -44,10 +45,15 @@ export class HUD {
     this.el.keys.textContent = '⚿ '.repeat(count) + '· '.repeat(total - count);
   }
 
-  setBattery(pct) {
+  setBattery(pct, band = 'normal') {
     this.el.batteryFill.style.width = `${Math.max(0, pct)}%`;
-    this.el.batteryFill.style.background = pct < 20 ? '#7e1212' : pct < 45 ? '#7a6a3f' : '#5d7a4f';
-    this.el.battery.classList.toggle('dying', pct < 20);
+    this.el.batteryFill.style.background = band === 'empty' || band === 'critical'
+      ? '#9d1414'
+      : band === 'low' ? '#b87622' : '#5d7a4f';
+    this.el.battery.classList.toggle('low', band === 'low');
+    this.el.battery.classList.toggle('critical', band === 'critical');
+    this.el.battery.classList.toggle('empty', band === 'empty');
+    this.el.batteryLabel.textContent = band === 'normal' ? 'TOKENS' : `TOKENS ${band.toUpperCase()}`;
   }
 
   setBurn(meter) {
